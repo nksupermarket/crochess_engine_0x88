@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Vector {
-    UP(-16), UP_RIGHT(-17), UP_LEFT(-15), LEFT(-1), RIGHT(1), DOWN(16), DOWN_RIGHT(-15), DOWN_LEFT(-17);
+    UP(16), UP_RIGHT(17), UP_LEFT(15), LEFT(-1), RIGHT(1), DOWN(-16), DOWN_RIGHT(-15), DOWN_LEFT(-17);
 
-    final int offset;
+    public final int offset;
 
     Vector(int offset) {
         this.offset = offset;
@@ -17,7 +17,8 @@ public enum Vector {
 
     static {
         Arrays.stream(Vector.values())
-                .forEach(s -> lookup.put(s.offset, s));
+              .forEach(s -> lookup.put(s.offset,
+                      s));
     }
 
     public static Vector of(Integer value) {

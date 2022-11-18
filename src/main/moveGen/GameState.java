@@ -1,14 +1,14 @@
 package main.moveGen;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import main.utils.DeltaArray;
+
+import java.util.*;
 
 final public class GameState {
 
     private GameState() {
     }
+
 
     public static int[] board = new int[128];
     //start index for each piece is equal to Piece.id - 1 * 10 (need to multiply by 10 bc that is max amount of possible
@@ -37,7 +37,7 @@ final public class GameState {
         board[23] = Color.W.id | Piece.PAWN.id;
 
         Arrays.fill(wPieceList,
-                    -1);
+                -1);
         wPieceList[0] = 16;
         wPieceList[1] = 17;
         wPieceList[2] = 18;
@@ -55,8 +55,6 @@ final public class GameState {
         wPieceList[40] = 3;
         wPieceList[50] = 4;
 
-        Arrays.fill(bPieceList,
-                    -1);
         board[112] = Color.B.id | Piece.ROOK.id;
         board[113] = Color.B.id | Piece.KNIGHT.id;
         board[114] = Color.B.id | Piece.BISHOP.id;
@@ -74,6 +72,8 @@ final public class GameState {
         board[102] = Color.B.id | Piece.PAWN.id;
         board[103] = Color.B.id | Piece.PAWN.id;
 
+        Arrays.fill(bPieceList,
+                -1);
         bPieceList[0] = 96;
         bPieceList[1] = 97;
         bPieceList[2] = 98;
@@ -100,30 +100,54 @@ final public class GameState {
     // map fen representation of castle rights to binary
     static {
         castleMap.put('K',
-                      8);
+                8);
         castleMap.put('Q',
-                      4);
+                4);
         castleMap.put('k',
-                      2);
+                2);
         castleMap.put('q',
-                      1);
+                1);
+    }
+
+    private static void pushToPieceList(Color color,
+                                        int pieceId,
+                                        int squareIdx) {
+        int[] list = color == Color.W ? wPieceList : bPieceList;
+
+        int startIdx = (pieceId - 1) * 10;
+        for (int i = 0; i < 10; i++) {
+            int nextIdx = startIdx + i;
+            if (nextIdx > 50) return;
+            if (list[nextIdx] == -1) {
+                list[nextIdx] = squareIdx;
+                return;
+            }
+        }
     }
 
     public static void loadFen(String fen) {
         board = new int[128];
+
+        wPieceList = new int[51];
+        bPieceList = new int[51];
+        Arrays.fill(wPieceList,
+                -1);
+        Arrays.fill(bPieceList,
+                -1);
+
         Map<Character, Integer> pieceIdMap = new HashMap<>();
         pieceIdMap.put('k',
-                       Piece.KING.id);
+                Piece.KING.id);
         pieceIdMap.put('q',
-                       Piece.QUEEN.id);
+                Piece.QUEEN.id);
         pieceIdMap.put('r',
-                       Piece.ROOK.id);
+                Piece.ROOK.id);
         pieceIdMap.put('n',
-                       Piece.KNIGHT.id);
+                Piece.KNIGHT.id);
         pieceIdMap.put('b',
-                       Piece.BISHOP.id);
+                Piece.BISHOP.id);
         pieceIdMap.put('p',
-                       Piece.PAWN.id);
+                Piece.PAWN.id);
 
         String[] fenState = fen.split(" ");
 
@@ -150,7 +174,11 @@ final public class GameState {
                     Color.B :
                     Color.W;
             int idx = rank * 16 + file;
-            board[idx] = color.id | pieceIdMap.get(type);
+            int pieceId = pieceIdMap.get(type);
+            board[idx] = color.id | pieceId;
+            pushToPieceList(color,
+                    pieceId,
+                    idx);
             file++;
         }
 
@@ -161,12 +189,12 @@ final public class GameState {
         }
 
         activeColor = Objects.equals(fenState[1],
-                                     "w") ?
+                "w") ?
                 Color.W :
                 Color.B;
 
         enPassant = !Objects.equals(fenState[3],
-                                    "-") ?
+                "-") ?
                 Square.valueOf(fenState[3].toUpperCase()) :
                 null;
     }

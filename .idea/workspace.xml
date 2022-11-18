@@ -2,19 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chess-api.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/Color.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/GameState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/Moves.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/Piece.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/Square.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/Vector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/utils/DeltaArray.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/moveGen/MovesTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess-api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/chess-api.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Color.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Color.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/GameState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Moves.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Moves.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Square.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Square.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Vector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Vector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/moveGen/GameStateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/moveGen/GameStateTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +51,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "last_opened_file_path": "/home/alex/JavaProjects/chess-api/src/main/moveGen/Vector.java",
     "settings.editor.selected.configurable": "preferences.sourceCode.Java"
   }
 }]]></component>
@@ -63,15 +61,34 @@
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.GameStateTest.enPassantWorks">
-    <configuration name="Gameboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Gameboard" />
+  <component name="RunManager" selected="JUnit.MovesTest$pseudoLegalMovesForKing.doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnKingside">
+    <configuration name="DeltaArray" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="main.utils.DeltaArray" />
       <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="main.utils.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="GameStateTest.castleRightsAreCorrect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="GameState" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="main.moveGen.GameState" />
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="main.moveGen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameStateTest$loadFen.pieceListIsCorrect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
         <pattern>
@@ -79,15 +96,15 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest" />
-      <option name="METHOD_NAME" value="castleRightsAreCorrect" />
+      <option name="PACKAGE_NAME" value="test.moveGen.GameStateTest" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest$loadFen" />
+      <option name="METHOD_NAME" value="pieceListIsCorrect" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="GameStateTest.enPassantWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="MovesTest$pseudoLegalMovesForKing.doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnKingside" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
         <pattern>
@@ -95,15 +112,15 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest" />
-      <option name="METHOD_NAME" value="enPassantWorks" />
+      <option name="PACKAGE_NAME" value="test.moveGen.MovesTest" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.MovesTest$pseudoLegalMovesForKing" />
+      <option name="METHOD_NAME" value="doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnKingside" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="GameStateTest.loadFenWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="MovesTest$pseudoLegalMovesForKing.doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnQueenside" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
         <pattern>
@@ -111,9 +128,9 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest" />
-      <option name="METHOD_NAME" value="loadFenWorks" />
+      <option name="PACKAGE_NAME" value="test.moveGen.MovesTest" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.MovesTest$pseudoLegalMovesForKing" />
+      <option name="METHOD_NAME" value="doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnQueenside" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -121,10 +138,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.GameStateTest.enPassantWorks" />
-        <item itemvalue="JUnit.GameStateTest.castleRightsAreCorrect" />
-        <item itemvalue="JUnit.GameStateTest.loadFenWorks" />
-        <item itemvalue="Application.Gameboard" />
+        <item itemvalue="JUnit.MovesTest$pseudoLegalMovesForKing.doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnKingside" />
+        <item itemvalue="JUnit.MovesTest$pseudoLegalMovesForKing.doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnQueenside" />
+        <item itemvalue="Application.DeltaArray" />
+        <item itemvalue="Application.GameState" />
+        <item itemvalue="JUnit.GameStateTest$loadFen.pieceListIsCorrect" />
       </list>
     </recent_temporary>
   </component>
@@ -149,5 +167,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/moveGen/Moves.java</url>
+          <line>232</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

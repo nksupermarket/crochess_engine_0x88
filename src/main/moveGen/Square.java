@@ -13,22 +13,22 @@ public enum Square {
     A7(96), B7(97), C7(98), D7(99), E7(100), F7(101), G7(102), H7(103),
     A8(112), B8(113), C8(114), D8(115), E8(116), F8(117), G8(118), H8(119);
 
-    final int idx;
-    public static final Map<Integer, Square> lookup = new HashMap<>();
-
-    static {
-        for (Square square : Square.values()) {
-            lookup.put(square.idx, square);
-        }
-    }
+    public final int idx;
 
     Square(int idx) {
         this.idx = idx;
     }
 
+    public static final Map<Integer, Square> lookup = new HashMap<>();
+
+    static {
+        for (Square square : Square.values()) {
+            lookup.put(square.idx,
+                    square);
+        }
+    }
 
     public static boolean isValid(int idx) {
         return (idx & 0x88) == 0;
     }
-
 }

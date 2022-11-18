@@ -18,31 +18,33 @@ final public class Moves {
     ATTACK_N = 6;
      */
     final private static int[] ATTACK_TABLE = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0,     //0-19
-            0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 5, 0,     //20-39
-            0, 0, 0, 5, 0, 0, 0, 0, 2, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0,     //40-59
-            5, 0, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0,     //60-79
-            2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 2, 6, 5, 0,     //80-99
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 4, 1, 4, 6, 0, 0, 0, 0, 0,     //100-119
-            0, 2, 2, 2, 2, 2, 2, 1, 0, 1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0,     //120-139
-            0, 0, 6, 3, 1, 3, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6,     //140-159
-            2, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 2, 0, 0, 5,     //160-179
-            0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0,     //180-199
-            0, 0, 0, 5, 0, 0, 0, 0, 2, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0,     //200-219
-            0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0,     //220-239
-            2, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }; //240-256
+            5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0,
+            0, 0, 0, 2, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 2,
+            0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 5,
+            0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 2, 0, 0, 5, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 5, 6, 2, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 6, 3, 1, 3, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 1, 0,
+            1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 6, 4, 1, 4, 6, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 2, 6, 5, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 5, 0, 0, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+            0, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 2,
+            0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+            0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 5,
+            };
+
     final private static int[] DELTA_ARRAY = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, -17, 0, 0, 0, 0, 0, 0, -16, 0, 0,
-            0, 0, 0, 0, -15, 0, 0, -17, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0,
-            -15, 0, 0, 0, 0, -17, 0, 0, 0, 0, -16, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0,
-            0, -17, 0, 0, 0, -16, 0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, -17, 0, 0, -16, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, -17, -33, -16, -31, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -18, -17, -16, -15, -14, 0, 0, 0, 0, 0,
-            0, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 14, 15, 16, 17, 18, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 15, 31, 16, 33, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 16, 0, 0, 17, 0, 0, 0, 0, 0,
-            0, 0, 0, 15, 0, 0, 0, 16, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 16, 0, 0, 0, 0, 17, 0, 0, 0, 0, 15,
-            0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 17, 0, 0, 15, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0,
-            0, 0, 0, 0
+            17, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 15, 0, 0, 17, 0, 0,
+            0, 0, 0, 16, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 17, 0, 0, 0, 0, 16,
+            0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 16, 0, 0, 0, 15,
+            0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 16, 0, 0, 15, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 17, -33, 16, -31, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, -18, 17, 16, 15, -14, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+            -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 14, -15, -16, -17, 18, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, -15, 31, -16, 33, -17, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, -15, 0, 0, -16, 0, 0, -17, 0, 0, 0, 0, 0, 0, 0, 0, -15,
+            0, 0, 0, -16, 0, 0, 0, -17, 0, 0, 0, 0, 0, 0, -15, 0, 0, 0, 0, -16,
+            0, 0, 0, 0, -17, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0,
+            0, -17, 0, 0, -15, 0, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0, 0, -17
     };
 
     public static List<Integer> pseudoLegal(int[] board,
@@ -50,8 +52,9 @@ final public class Moves {
                                             Piece pieceType,
                                             Color color) {
         List<Integer> moves = new ArrayList<>();
+
         Function<Integer, Boolean> pushToMoves = (Integer squareIdx) -> {
-            if (Color.extractColor(board[squareIdx]) == color) return false;
+            if (board[squareIdx] != 0 && Color.extractColor(board[squareIdx]) == color) return false;
             moves.add(squareIdx);
             // return false after capture move has been added
             return board[squareIdx] == 0;
@@ -87,7 +90,10 @@ final public class Moves {
             }
 
             case BISHOP -> {
-                final Vector[] DIAGONAL_VECTORS = {Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT, Vector.UP_RIGHT};
+                final Vector[] DIAGONAL_VECTORS = {
+                        Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT,
+                        Vector.DOWN_RIGHT
+                };
                 for (Vector vector : DIAGONAL_VECTORS) {
                     traverseVectorLong(vector,
                             start,
@@ -99,7 +105,9 @@ final public class Moves {
             case KNIGHT -> {
                 final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
                 for (int jump : KNIGHT_JUMPS) {
-                    pushToMoves.apply(start.idx + jump);
+                    int jumpIdx = start.idx + jump;
+                    if (Square.isValid(jumpIdx))
+                        pushToMoves.apply(jumpIdx);
                 }
                 return moves;
             }
@@ -115,14 +123,15 @@ final public class Moves {
                                       int[] oppPieceList,
                                       int[] board) {
         final boolean[] attacked = {false};
-        outerLoop:
         for (Piece piece : Piece.values()) {
             if (piece == Piece.NULL) continue;
-            for (int i = 0; i < 10; i++) {
-                if (i == oppPieceList.length) break;
-                int idx = piece.id * 10 + i;
-                if (oppPieceList[idx] == -1) break outerLoop;
-                int delta = square.idx - oppPieceList[idx];
+            // iterating to 10 because each piece type gets 10 slots in the array except the king
+            for (int i = 0; i < (piece == Piece.KING ? 1 : 10); i++) {
+                int idx = (piece.id - 1) * 10 + i;
+
+                if (oppPieceList[idx] == -1) break;
+                int delta = square.idx - oppPieceList[idx] + Square.H8.idx;
+                // need to add 119 so there are no negative indices
 
                 Function<Integer, Boolean> lookForObstacles = (Integer squareIdx) -> {
                     if (board[squareIdx] == 0) return true;
@@ -132,7 +141,7 @@ final public class Moves {
                     }
                     return false;
                 };
-
+                
                 switch (ATTACK_TABLE[delta]) {
                    /*   ATTACK_NONE : 0;
                         ATTACK_KQR : 1;
@@ -144,14 +153,16 @@ final public class Moves {
                     */
                     case 1 -> {
                         if (piece == Piece.KING) return true;
-
+                        if (piece != Piece.ROOK && piece != Piece.QUEEN) return false;
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
                                 lookForObstacles);
                         if (attacked[0]) return true;
                     }
 
-                    case 2, 5 -> {
+                    case 2 -> {
+                        if (piece != Piece.ROOK && piece != Piece.QUEEN) return false;
+
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
                                 lookForObstacles);
@@ -161,6 +172,8 @@ final public class Moves {
                     case 3 -> {
                         if (piece == Piece.KING) return true;
                         if (piece == Piece.PAWN && oppColor == Color.W) return true;
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
                                 lookForObstacles);
@@ -170,6 +183,17 @@ final public class Moves {
                     case 4 -> {
                         if (piece == Piece.KING) return true;
                         if (piece == Piece.PAWN && oppColor == Color.B) return true;
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+
+                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                                square,
+                                lookForObstacles);
+                        if (attacked[0]) return true;
+                    }
+
+                    case 5 -> {
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
                                 lookForObstacles);
@@ -191,15 +215,16 @@ final public class Moves {
                                                    int castleRights,
                                                    int[] oppPieceMap) {
         List<Integer> moves = new ArrayList<>();
-        Function<Integer, Boolean> pushToMovesRegular = (Integer squareIdx) -> {
-            if (board[squareIdx] != 0) return false;
+        Function<Integer, Boolean> pushToMoves = (Integer squareIdx) -> {
+            if (board[squareIdx] != 0 && Color.extractColor(board[squareIdx]) == color) return false;
             moves.add(squareIdx);
-            return false;
+            // return false after capture move has been added
+            return board[squareIdx] == 0;
         };
         for (Vector vector : Vector.values()) {
             traverseVectorShort(vector,
                     start,
-                    pushToMovesRegular);
+                    pushToMoves);
         }
 
         // kingside castle check
@@ -214,7 +239,7 @@ final public class Moves {
         }
         //queenside castle check
         if (color == Color.W && (castleRights & 4) != 0 || color == Color.B && (castleRights & 1) != 0) {
-            if (!isAttacked(color == Color.W ? Square.D1 : Square.C8,
+            if (!isAttacked(color == Color.W ? Square.D1 : Square.D8,
                     oppColor,
                     oppPieceMap,
                     board)) moves.add(color == Color.W ?
@@ -247,8 +272,8 @@ final public class Moves {
                         Vector.DOWN_LEFT
                 };
         Function<Integer, Boolean> pushToMovesCapture = (Integer squareIdx) -> {
-            if (Square.lookup.get(squareIdx) != enPassant || board[squareIdx] == 0 ||
-                    Color.extractColor(board[squareIdx]) == color) return false;
+            if (Square.lookup.get(squareIdx) != enPassant && board[squareIdx] == 0) return false;
+            if (Color.extractColor(board[squareIdx]) == color) return false;
             moves.add(squareIdx);
             return false;
         };
