@@ -148,9 +148,9 @@ public class GameStateTest {
             bPieceList[40] = 115;
             bPieceList[50] = 116;
 
-            MatcherAssert.assertThat(GameState.wPieceList,
+            MatcherAssert.assertThat(GameState.pieceList.get(Color.W),
                     is(wPieceList));
-            MatcherAssert.assertThat(GameState.bPieceList,
+            MatcherAssert.assertThat(GameState.pieceList.get(Color.B),
                     is(bPieceList));
         }
     }

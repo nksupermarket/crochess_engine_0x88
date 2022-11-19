@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-final public class Moves {
-    private Moves() {
+final public class MoveGen {
+    private MoveGen() {
     }
 
     /*
@@ -29,8 +29,8 @@ final public class Moves {
             0, 0, 0, 0, 5, 0, 0, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5,
             0, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 2,
             0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
-            0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 5,
-            };
+            0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 5
+    };
 
     final private static int[] DELTA_ARRAY = {
             17, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 15, 0, 0, 17, 0, 0,
@@ -47,17 +47,18 @@ final public class Moves {
             0, -17, 0, 0, -15, 0, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0, 0, -17
     };
 
-    public static List<Integer> pseudoLegal(int[] board,
-                                            Square start,
-                                            Piece pieceType,
-                                            Color color) {
-        List<Integer> moves = new ArrayList<>();
+    public static List<Move> pseudoLegal(int[] board,
+                                         Square start,
+                                         Piece pieceType,
+                                         Color color) {
+        List<Move> moves = new ArrayList<>();
 
-        Function<Integer, Boolean> pushToMoves = (Integer squareIdx) -> {
-            if (board[squareIdx] != 0 && Color.extractColor(board[squareIdx]) == color) return false;
-            moves.add(squareIdx);
+        Function<Square, Boolean> pushToMoves = (Square square) -> {
+            if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
+            moves.add(new Move(start,
+                    square));
             // return false after capture move has been added
-            return board[squareIdx] == 0;
+            return board[square.idx] == 0;
         };
 
         switch (pieceType) {
@@ -107,7 +108,7 @@ final public class Moves {
                 for (int jump : KNIGHT_JUMPS) {
                     int jumpIdx = start.idx + jump;
                     if (Square.isValid(jumpIdx))
-                        pushToMoves.apply(jumpIdx);
+                        pushToMoves.apply(Square.lookup.get(jumpIdx));
                 }
                 return moves;
             }
@@ -118,30 +119,31 @@ final public class Moves {
         }
     }
 
-    private static boolean isAttacked(Square square,
-                                      Color oppColor,
-                                      int[] oppPieceList,
-                                      int[] board) {
+    public static boolean isAttacked(Square square,
+                                     Color oppColor,
+                                     Square[] oppPieceList,
+                                     int[] board) {
         final boolean[] attacked = {false};
         for (Piece piece : Piece.values()) {
             if (piece == Piece.NULL) continue;
             // iterating to 10 because each piece type gets 10 slots in the array except the king
             for (int i = 0; i < (piece == Piece.KING ? 1 : 10); i++) {
+                // need to subtract 1 to account for Piece.NULL
                 int idx = (piece.id - 1) * 10 + i;
 
-                if (oppPieceList[idx] == -1) break;
-                int delta = square.idx - oppPieceList[idx] + Square.H8.idx;
+                if (oppPieceList[idx] == Square.NULL) break;
+                int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
                 // need to add 119 so there are no negative indices
 
-                Function<Integer, Boolean> lookForObstacles = (Integer squareIdx) -> {
-                    if (board[squareIdx] == 0) return true;
-                    if (Color.extractColor(board[squareIdx]) != oppColor) return false;
-                    if (Piece.extractPieceType(board[squareIdx]) == piece) {
+                Function<Square, Boolean> lookForObstacles = (Square newSquare) -> {
+                    if (board[newSquare.idx] == 0) return true;
+                    if (Color.extractColor(board[newSquare.idx]) != oppColor) return false;
+                    if (Piece.extractPieceType(board[newSquare.idx]) == piece) {
                         attacked[0] = true;
                     }
                     return false;
                 };
-                
+
                 switch (ATTACK_TABLE[delta]) {
                    /*   ATTACK_NONE : 0;
                         ATTACK_KQR : 1;
@@ -209,17 +211,18 @@ final public class Moves {
         return false;
     }
 
-    public static List<Integer> pseudoLegalForKing(int[] board,
-                                                   Square start,
-                                                   Color color,
-                                                   int castleRights,
-                                                   int[] oppPieceMap) {
-        List<Integer> moves = new ArrayList<>();
-        Function<Integer, Boolean> pushToMoves = (Integer squareIdx) -> {
-            if (board[squareIdx] != 0 && Color.extractColor(board[squareIdx]) == color) return false;
-            moves.add(squareIdx);
+    public static List<Move> pseudoLegalForKing(int[] board,
+                                                Square start,
+                                                Color color,
+                                                int castleRights,
+                                                Square[] oppPieceMap) {
+        List<Move> moves = new ArrayList<>();
+        Function<Square, Boolean> pushToMoves = (Square square) -> {
+            if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
+            moves.add(new Move(start,
+                    square));
             // return false after capture move has been added
-            return board[squareIdx] == 0;
+            return board[square.idx] == 0;
         };
         for (Vector vector : Vector.values()) {
             traverseVectorShort(vector,
@@ -230,33 +233,46 @@ final public class Moves {
         // kingside castle check
         Color oppColor = color == Color.W ? Color.B : Color.W;
         if (color == Color.W && (castleRights & 8) != 0 || color == Color.B && (castleRights & 2) != 0) {
-            if (!isAttacked(color == Color.W ? Square.F1 : Square.F8,
+            if (!isAttacked(color == Color.W ? Castle.W_K.rSquare : Castle.B_k.rSquare,
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add(color == Color.W ? Square.G1.idx : Square.G8.idx);
+                moves.add(new Move(start,
+                        color == Color.W ? Castle.W_K : Castle.B_k));
             }
         }
         //queenside castle check
         if (color == Color.W && (castleRights & 4) != 0 || color == Color.B && (castleRights & 1) != 0) {
-            if (!isAttacked(color == Color.W ? Square.D1 : Square.D8,
+            if (!isAttacked(color == Color.W ? Castle.W_Q.rSquare : Castle.B_q.rSquare,
                     oppColor,
                     oppPieceMap,
-                    board)) moves.add(color == Color.W ?
-                    Square.C1.idx :
-                    Square.C8.idx);
+                    board)) {
+                moves.add(new Move(start,
+                        color == Color.W ? Castle.W_Q : Castle.B_q));
+            }
         }
         return moves;
     }
 
-    public static List<Integer> pseudoLegalForPawn(int[] board,
-                                                   Square start,
-                                                   Color color,
-                                                   Square enPassant) {
-        List<Integer> moves = new ArrayList<>();
-        Function<Integer, Boolean> pushToMovesRegular = (Integer squareIdx) -> {
-            if (board[squareIdx] != 0) return false;
-            moves.add(squareIdx);
+    public static List<Move> pseudoLegalForPawn(int[] board,
+                                                Square start,
+                                                Color color,
+                                                Square enPassant) {
+        List<Move> moves = new ArrayList<>();
+        Function<Square, Boolean> pushToMovesRegular = (Square square) -> {
+            if (board[square.idx] != 0) return false;
+
+            if (!Square.isPromotion(square,
+                    color)) moves.add(new Move(start,
+                    square));
+            else {
+                for (Piece piece : Piece.getPromoteTypes()) {
+                    moves.add(new Move(start,
+                            square,
+                            piece));
+                }
+            }
+
             return false;
         };
         traverseVectorShort(color == Color.W ?
@@ -271,10 +287,19 @@ final public class Moves {
                         Vector.DOWN_RIGHT,
                         Vector.DOWN_LEFT
                 };
-        Function<Integer, Boolean> pushToMovesCapture = (Integer squareIdx) -> {
-            if (Square.lookup.get(squareIdx) != enPassant && board[squareIdx] == 0) return false;
-            if (Color.extractColor(board[squareIdx]) == color) return false;
-            moves.add(squareIdx);
+        Function<Square, Boolean> pushToMovesCapture = (Square square) -> {
+            if (square != enPassant && board[square.idx] == 0) return false;
+            if (Color.extractColor(board[square.idx]) == color) return false;
+            if (!Square.isPromotion(square,
+                    color)) moves.add(new Move(start,
+                    square));
+            else {
+                for (Piece piece : Piece.getPromoteTypes()) {
+                    moves.add(new Move(start,
+                            square,
+                            piece));
+                }
+            }
             return false;
         };
         for (Vector vector : captureVectors) {
@@ -287,20 +312,20 @@ final public class Moves {
 
     private static void traverseVectorLong(Vector vector,
                                            Square start,
-                                           Function<Integer, Boolean> cb) {
+                                           Function<Square, Boolean> cb) {
         int squareIdx = start.idx + vector.offset;
         while (Square.isValid(squareIdx)) {
-            if (!cb.apply(squareIdx)) break;
-            squareIdx += vector.offset;
+            if (!cb.apply(Square.lookup.get(squareIdx))) break;
+            squareIdx = squareIdx + vector.offset;
         }
     }
 
     private static void traverseVectorShort(Vector vector,
                                             Square start,
-                                            Function<Integer, Boolean> cb) {
+                                            Function<Square, Boolean> cb) {
         int squareIdx = start.idx + vector.offset;
         if (Square.isValid(squareIdx)) {
-            cb.apply(squareIdx);
+            cb.apply(Square.lookup.get(squareIdx));
         }
     }
 }

@@ -11,7 +11,7 @@ public enum Square {
     A5(64), B5(65), C5(66), D5(67), E5(68), F5(69), G5(70), H5(71),
     A6(80), B6(81), C6(82), D6(83), E6(84), F6(85), G6(86), H6(87),
     A7(96), B7(97), C7(98), D7(99), E7(100), F7(101), G7(102), H7(103),
-    A8(112), B8(113), C8(114), D8(115), E8(116), F8(117), G8(118), H8(119);
+    A8(112), B8(113), C8(114), D8(115), E8(116), F8(117), G8(118), H8(119), NULL(-1);
 
     public final int idx;
 
@@ -30,5 +30,16 @@ public enum Square {
 
     public static boolean isValid(int idx) {
         return (idx & 0x88) == 0;
+    }
+
+    private static int getRank(Square square) {
+        return Math.floorDiv(square.idx,
+                16);
+    }
+
+    public static boolean isPromotion(Square square,
+                                      Color color) {
+        int rank = getRank(square);
+        return rank == 7 && color == Color.W || rank == 0 && color == Color.B;
     }
 }

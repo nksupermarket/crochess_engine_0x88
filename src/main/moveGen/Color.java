@@ -10,7 +10,10 @@ public enum Color {
     }
 
     public static Color extractColor(int boardVal) {
-
         return (boardVal & 24) == 16 ? Color.B : Color.W;
+    }
+
+    public static Color getOppColor(Color color) {
+        return color == Color.W ? Color.B : Color.W;
     }
 }
