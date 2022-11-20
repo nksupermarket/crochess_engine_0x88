@@ -155,7 +155,7 @@ final public class MoveGen {
                     */
                     case 1 -> {
                         if (piece == Piece.KING) return true;
-                        if (piece != Piece.ROOK && piece != Piece.QUEEN) return false;
+                        if (piece != Piece.ROOK && piece != Piece.QUEEN) continue;
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
                                 lookForObstacles);
@@ -163,7 +163,7 @@ final public class MoveGen {
                     }
 
                     case 2 -> {
-                        if (piece != Piece.ROOK && piece != Piece.QUEEN) return false;
+                        if (piece != Piece.ROOK && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
@@ -174,7 +174,7 @@ final public class MoveGen {
                     case 3 -> {
                         if (piece == Piece.KING) return true;
                         if (piece == Piece.PAWN && oppColor == Color.W) return true;
-                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
@@ -185,7 +185,7 @@ final public class MoveGen {
                     case 4 -> {
                         if (piece == Piece.KING) return true;
                         if (piece == Piece.PAWN && oppColor == Color.B) return true;
-                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
@@ -194,7 +194,7 @@ final public class MoveGen {
                     }
 
                     case 5 -> {
-                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) return false;
+                        if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
                                 square,
@@ -233,22 +233,23 @@ final public class MoveGen {
         // kingside castle check
         Color oppColor = color == Color.W ? Color.B : Color.W;
         if (color == Color.W && (castleRights & 8) != 0 || color == Color.B && (castleRights & 2) != 0) {
-            if (!isAttacked(color == Color.W ? Castle.W_K.rSquare : Castle.B_k.rSquare,
+            final Castle castle = color == Color.W ? Castle.W_K : Castle.B_k;
+            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add(new Move(start,
-                        color == Color.W ? Castle.W_K : Castle.B_k));
+                moves.add(new Move(start, castle));
             }
         }
         //queenside castle check
         if (color == Color.W && (castleRights & 4) != 0 || color == Color.B && (castleRights & 1) != 0) {
-            if (!isAttacked(color == Color.W ? Castle.W_Q.rSquare : Castle.B_q.rSquare,
+            final Castle castle = color == Color.W ? Castle.W_Q : Castle.B_q;
+
+            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add(new Move(start,
-                        color == Color.W ? Castle.W_Q : Castle.B_q));
+                moves.add(new Move(start, castle));
             }
         }
         return moves;

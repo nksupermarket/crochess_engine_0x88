@@ -205,7 +205,7 @@ final public class GameState {
         halfmoves = Integer.parseInt(fenState[4]);
     }
 
-    public static void makeMove(Move move, UnmakeDetails moveDetails) {
+    public static boolean makeMove(Move move, UnmakeDetails moveDetails) {
         moveDetails.prevCastleRights = castleRights;
         moveDetails.prevEnPassant = enPassant;
         moveDetails.prevHalfmoves = halfmoves;
@@ -222,7 +222,7 @@ final public class GameState {
             board[move.castle.rSquare.idx] = board[rookPos.idx];
             board[rookPos.idx] = 0;
 
-            boolean valid = !MoveGen.isAttacked(kingPos,
+            boolean valid = !MoveGen.isAttacked(move.castle.square,
                     oppColor,
                     pieceList.get(oppColor),
                     board);
@@ -232,7 +232,7 @@ final public class GameState {
                 board[move.castle.square.idx] = 0;
                 board[rookPos.idx] = board[move.castle.rSquare.idx];
                 board[move.castle.rSquare.idx] = 0;
-                return;
+                return false;
             } else {
                 moveDetails.castle = move.castle;
                 pieceList.get(activeColor)[50] = move.castle.square;
@@ -258,7 +258,7 @@ final public class GameState {
                 board[move.from.idx] = activeColor.id | Piece.PAWN.id;
                 board[enPassantCaptureSquare.idx] = moveDetails.capturedPiece;
                 moveDetails.capturePieceSquare = enPassantCaptureSquare;
-                return;
+                return false;
             } else {
                 pieceList.get(activeColor)[Utils.findIndexOf(move.from,
                         pieceList.get(activeColor))] = move.to;
@@ -282,7 +282,7 @@ final public class GameState {
             if (!valid) {
                 board[move.from.idx] = activeColor.id | Piece.PAWN.id;
                 board[move.to.idx] = 0;
-                return;
+                return false;
             }
 
             if (move.promote != null) {
@@ -335,5 +335,9 @@ final public class GameState {
 
         if (moveDetails.capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
         else halfmoves = 0;
+
+        activeColor = Color.getOppColor(activeColor);
+
+        return true;
     }
 }

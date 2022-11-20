@@ -2,15 +2,11 @@ package test.moveGen;
 
 
 import jdk.jfr.Description;
+import main.moveGen.*;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 
 import static org.hamcrest.CoreMatchers.*;
-
-import main.moveGen.GameState;
-import main.moveGen.Color;
-import main.moveGen.Piece;
-import main.moveGen.Square;
 
 import java.util.Arrays;
 
@@ -152,6 +148,142 @@ public class GameStateTest {
                     is(wPieceList));
             MatcherAssert.assertThat(GameState.pieceList.get(Color.B),
                     is(bPieceList));
+        }
+    }
+
+    @Nested
+    @Description("test makeMove")
+    public class makeMove {
+        UnmakeDetails unmakeDetails = new UnmakeDetails();
+
+        @BeforeEach
+        public void init() {
+            GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            unmakeDetails.reset();
+        }
+
+
+        @Test
+        public void movesPiece() {
+            Move move = new Move(Square.E2, Square.E4);
+            GameState.makeMove(move, unmakeDetails);
+
+            MatcherAssert.assertThat(GameState.board[Square.E4.idx], is(Color.W.id | Piece.PAWN.id));
+        }
+
+        @Test
+        public void togglesEnPassant() {
+            Move wMove = new Move(Square.E2, Square.E4);
+            GameState.makeMove(wMove, unmakeDetails);
+
+            MatcherAssert.assertThat(GameState.enPassant, is(Square.E3));
+
+            Move bMove = new Move(Square.E7, Square.E5);
+            GameState.makeMove(bMove, unmakeDetails);
+
+            MatcherAssert.assertThat(GameState.enPassant, is(Square.E6));
+        }
+
+        @Test
+        public void capturesWork() {
+            Move wMove = new Move(Square.E2, Square.E4);
+            GameState.makeMove(wMove, unmakeDetails);
+
+            Move bMove = new Move(Square.D7, Square.D5);
+            GameState.makeMove(bMove, unmakeDetails);
+
+            GameState.makeMove(new Move(Square.E4, Square.D5), unmakeDetails);
+            MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.W.id | Piece.PAWN.id));
+        }
+
+        @Nested
+        @DisplayName("castle works")
+        class castle {
+            @Nested
+            @Description("castle works kingside")
+            class kingside {
+                @Test
+                public void whiteside() {
+                    GameState.loadFen("rnbqkbnr/pppppppp/8/8/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1");
+                    Castle castle = Castle.W_K;
+                    GameState.makeMove(new Move(Square.E1, castle), unmakeDetails);
+
+                    MatcherAssert.assertThat(GameState.board[castle.square.idx], is(Color.W.id | Piece.KING.id));
+                    MatcherAssert.assertThat(GameState.board[castle.rSquare.idx], is(Color.W.id | Piece.ROOK.id));
+                }
+
+                @Test
+                void blackside() {
+                    GameState.loadFen("rnbqk2r/pppp1ppp/5n2/2b1p3/8/8/PPPPPPPP/RNBQKBNR B KQkq - 0 1");
+                    Castle castle = Castle.B_k;
+                    GameState.makeMove(new Move(Square.E8, castle), unmakeDetails);
+
+                    MatcherAssert.assertThat(GameState.board[castle.square.idx], is(Color.B.id | Piece.KING.id));
+                    MatcherAssert.assertThat(GameState.board[castle.rSquare.idx], is(Color.B.id | Piece.ROOK.id));
+                }
+            }
+
+            @Nested
+            @Description("castle works queenside")
+            class queenside {
+                @Test
+                public void whiteside() {
+                    GameState.loadFen("rnbqkbnr/pppppppp/8/8/3P1B2/2N5/PPPQPPPP/R3KBNR w KQkq - 0 1");
+                    Castle castle = Castle.W_Q;
+                    GameState.makeMove(new Move(Square.E1, castle), unmakeDetails);
+
+                    MatcherAssert.assertThat(GameState.board[castle.square.idx], is(Color.W.id | Piece.KING.id));
+                    MatcherAssert.assertThat(GameState.board[castle.rSquare.idx], is(Color.W.id | Piece.ROOK.id));
+                }
+
+                @Test
+                void blackside() {
+                    GameState.loadFen("r3kbnr/pppqpppp/2n5/3p1b2/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+                    Castle castle = Castle.B_q;
+                    GameState.makeMove(new Move(Square.E8, castle), unmakeDetails);
+
+                    MatcherAssert.assertThat(GameState.board[castle.square.idx], is(Color.B.id | Piece.KING.id));
+                    MatcherAssert.assertThat(GameState.board[castle.rSquare.idx], is(Color.B.id | Piece.ROOK.id));
+                }
+            }
+        }
+
+        @Nested
+        class captureByEnPassantWorks {
+            @Test
+            public void whiteside() {
+                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1");
+
+                GameState.makeMove(new Move(Square.E5, Square.D6), unmakeDetails);
+
+                MatcherAssert.assertThat(GameState.board[Square.D6.idx], is(Color.W.id | Piece.PAWN.id));
+                MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(0));
+            }
+
+            @Test
+            public void blackside() {
+                GameState.loadFen("rnbqkbnr/pppp1ppp/8/8/3Pp3/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1");
+
+                GameState.makeMove(new Move(Square.E4, Square.D3), unmakeDetails);
+
+                MatcherAssert.assertThat(GameState.board[Square.D3.idx], is(Color.B.id | Piece.PAWN.id));
+                MatcherAssert.assertThat(GameState.board[Square.D4.idx], is(0));
+            }
+        }
+
+        @Nested
+        class cantMakeIllegalMove {
+            @Test
+            public void cantCastleIntoCheck() {
+                GameState.loadFen("rnbqkbn1/pppppppp/6r1/8/8/5N2/PPPPPP1P/RNBQK2R w KQkq - 0 1");
+
+                Castle castle = Castle.W_K;
+                boolean moveMade = GameState.makeMove(new Move(Square.E1, castle), unmakeDetails);
+
+                MatcherAssert.assertThat(moveMade, is(false));
+                MatcherAssert.assertThat(GameState.board[Square.E1.idx], is(Color.W.id | Piece.KING.id));
+                MatcherAssert.assertThat(GameState.board[Square.H1.idx], is(Color.W.id | Piece.ROOK.id));
+            }
         }
     }
 }
