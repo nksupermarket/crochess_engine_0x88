@@ -5,10 +5,8 @@ import main.utils.Utils;
 import java.util.*;
 
 final public class GameState {
-
     private GameState() {
     }
-
 
     public static int[] board = new int[128];
     //start index for each piece is equal to Piece.id - 1 * 10 (need to multiply by 10 bc that is max amount of possible
@@ -81,14 +79,14 @@ final public class GameState {
         final Square[] bPieceList = pieceList.get(Color.B);
         Arrays.fill(bPieceList,
                 Square.NULL);
-        bPieceList[0] = Square.A2;
-        bPieceList[1] = Square.B2;
-        bPieceList[2] = Square.C2;
-        bPieceList[3] = Square.D2;
-        bPieceList[4] = Square.E2;
-        bPieceList[5] = Square.F2;
-        bPieceList[6] = Square.G2;
-        bPieceList[7] = Square.H2;
+        bPieceList[0] = Square.A7;
+        bPieceList[1] = Square.B7;
+        bPieceList[2] = Square.C7;
+        bPieceList[3] = Square.D7;
+        bPieceList[4] = Square.E7;
+        bPieceList[5] = Square.F7;
+        bPieceList[6] = Square.G7;
+        bPieceList[7] = Square.H7;
         bPieceList[10] = Square.B8;
         bPieceList[11] = Square.G8;
         bPieceList[20] = Square.C8;
@@ -257,9 +255,11 @@ final public class GameState {
             if (!valid) {
                 board[move.from.idx] = activeColor.id | Piece.PAWN.id;
                 board[enPassantCaptureSquare.idx] = moveDetails.capturedPiece;
-                moveDetails.capturePieceSquare = enPassantCaptureSquare;
                 return false;
             } else {
+                board[enPassantCaptureSquare.idx] = moveDetails.capturedPiece;
+                moveDetails.capturePieceSquare = enPassantCaptureSquare;
+
                 pieceList.get(activeColor)[Utils.findIndexOf(move.from,
                         pieceList.get(activeColor))] = move.to;
                 Square[] oppList = pieceList.get(Color.getOppColor(activeColor));
@@ -274,14 +274,14 @@ final public class GameState {
             board[move.to.idx] = board[move.from.idx];
             board[move.from.idx] = 0;
 
-            boolean valid = !MoveGen.isAttacked(kingPos,
+            boolean valid = !MoveGen.isAttacked(pieceType == Piece.KING ? move.to : kingPos,
                     oppColor,
                     pieceList.get(oppColor),
                     board);
 
             if (!valid) {
-                board[move.from.idx] = activeColor.id | Piece.PAWN.id;
-                board[move.to.idx] = 0;
+                board[move.from.idx] = activeColor.id | pieceType.id;
+                board[move.to.idx] = moveDetails.capturedPiece;
                 return false;
             }
 
@@ -293,6 +293,7 @@ final public class GameState {
                 list[Utils.findIndexOf(move.from, list)] =
                         Square.NULL;
                 for (int i = 0; i < 10; i++) {
+                    // look for the first open slot
                     int idx = (move.promote.id - 1) * 10 + i;
                     if (list[idx] == Square.NULL) list[idx] = move.to;
                 }
@@ -306,6 +307,7 @@ final public class GameState {
             }
         }
 
+        enPassant = null;
         switch (pieceType) {
             case KING -> {
                 if (activeColor == Color.W) {
@@ -316,12 +318,6 @@ final public class GameState {
                     castleRights ^= 1;
                 }
             }
-            case ROOK -> {
-                if (move.from == Square.A1 && activeColor == Color.W) castleRights ^= 4;
-                if (move.from == Square.H1 && activeColor == Color.W) castleRights ^= 8;
-                if (move.from == Square.A8 && activeColor == Color.W) castleRights ^= 1;
-                if (move.from == Square.H8 && activeColor == Color.W) castleRights ^= 2;
-            }
 
             case PAWN -> {
                 if (Math.abs(move.from.idx - move.to.idx) == 2 * (Vector.UP.offset)) enPassant = Square.lookup.get(
@@ -329,6 +325,12 @@ final public class GameState {
                 );
             }
         }
+
+        // checking if rooks are on their home squares to see if i need to toggle castleRights
+        if (((board[Square.A1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) castleRights ^= Castle.W_Q.value;
+        if (((board[Square.H1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) castleRights ^= Castle.W_K.value;
+        if (((board[Square.A8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) castleRights ^= Castle.B_q.value;
+        if (((board[Square.H8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) castleRights ^= Castle.B_k.value;
 
         moveDetails.from = move.from;
         moveDetails.to = move.to;

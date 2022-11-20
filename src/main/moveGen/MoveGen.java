@@ -131,7 +131,10 @@ final public class MoveGen {
                 // need to subtract 1 to account for Piece.NULL
                 int idx = (piece.id - 1) * 10 + i;
 
-                if (oppPieceList[idx] == Square.NULL) break;
+                // xor so if the piece on the square is the same as piece variable, the last 3 bits will be 0
+                // if its not 0, it means the piece has been captured
+                if (oppPieceList[idx] == Square.NULL || ((board[oppPieceList[idx].idx] ^ piece.id) & 7) != 0) break;
+
                 int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
                 // need to add 119 so there are no negative indices
 
