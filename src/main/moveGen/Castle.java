@@ -1,44 +1,40 @@
 package main.moveGen;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Castle {
     W_K(8,
             Square.G1,
-            Square.F1), W_Q(4,
+            Square.F1, Square.H1), W_Q(4,
             Square.C1,
-            Square.D1), B_k(2,
+            Square.D1, Square.A1), B_k(2,
             Square.G8,
-            Square.F8), B_q(1,
+            Square.F8, Square.H8), B_q(1,
             Square.C8,
-            Square.D8);
+            Square.D8, Square.A8);
 
 
     final public int value;
     final public Square square;
     final public Square rSquare;
+    final public Square rInitSquare;
 
     Castle(int value,
            Square square,
-           Square rSquare) {
+           Square rSquare,
+           Square rInitSquare) {
         this.value = value;
         this.square = square;
         this.rSquare = rSquare;
+        this.rInitSquare = rInitSquare;
     }
 
-    public Square getSquareOfRook() {
-        switch (this) {
-            case W_K -> {
-                return Square.H1;
-            }
-            case W_Q -> {
-                return Square.A1;
-            }
-            case B_k -> {
-                return Square.H8;
-            }
-            case B_q -> {
-                return Square.A8;
-            }
+    final public static Map<Integer, Castle> lookup = new HashMap<>();
+
+    static {
+        for (Castle castle : Castle.values()) {
+            lookup.put(castle.value, castle);
         }
-        return Square.NULL;
     }
 }

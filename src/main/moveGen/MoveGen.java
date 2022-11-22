@@ -47,30 +47,27 @@ final public class MoveGen {
             0, -17, 0, 0, -15, 0, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0, 0, -17
     };
 
-    public static List<Move> pseudoLegal(int[] board,
-                                         Square start,
-                                         Piece pieceType,
-                                         Color color) {
-        List<Move> moves = new ArrayList<>();
+    public static List<Integer> pseudoLegal(int[] board,
+                                            Square start,
+                                            Piece pieceType,
+                                            Color color) {
+        /*
+        21 bit int to represent move
+        first 7 bits refer to the "to" square idx
+        next 7 bits refer to the "from" square idx
+        next 4 bits refer to castling
+        next 3 bits refer to promotion piece type
+         */
+        List<Integer> moves = new ArrayList<>();
 
         Function<Square, Boolean> pushToMoves = (Square square) -> {
             if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
-            moves.add(new Move(start,
-                    square));
+            moves.add((start.idx << 7) | square.idx);
             // return false after capture move has been added
             return board[square.idx] == 0;
         };
 
         switch (pieceType) {
-            case KING -> {
-                for (Vector vector : Vector.values()) {
-                    traverseVectorShort(vector,
-                            start,
-                            pushToMoves);
-                }
-                return moves;
-            }
-
             case QUEEN -> {
                 for (Vector vector : Vector.values()) {
                     traverseVectorLong(vector,
@@ -132,7 +129,7 @@ final public class MoveGen {
                 int idx = (piece.id - 1) * 10 + i;
 
                 // xor so if the piece on the square is the same as piece variable, the last 3 bits will be 0
-                // if its not 0, it means the piece has been captured
+                // if it's not 0, it means the piece has been captured
                 if (oppPieceList[idx] == Square.NULL || ((board[oppPieceList[idx].idx] ^ piece.id) & 7) != 0) break;
 
                 int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
@@ -214,16 +211,16 @@ final public class MoveGen {
         return false;
     }
 
-    public static List<Move> pseudoLegalForKing(int[] board,
-                                                Square start,
-                                                Color color,
-                                                int castleRights,
-                                                Square[] oppPieceMap) {
-        List<Move> moves = new ArrayList<>();
+    public static List<Integer> pseudoLegalForKing(int[] board,
+                                                   Square start,
+                                                   Color color,
+                                                   int castleRights,
+                                                   Square[] oppPieceMap) {
+        // refer to pseudoLegal for breakdown of move representation
+        List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMoves = (Square square) -> {
             if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
-            moves.add(new Move(start,
-                    square));
+            moves.add((start.idx << 7) | square.idx);
             // return false after capture move has been added
             return board[square.idx] == 0;
         };
@@ -241,7 +238,7 @@ final public class MoveGen {
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add(new Move(start, castle));
+                moves.add((castle.value << 14) | start.idx);
             }
         }
         //queenside castle check
@@ -252,28 +249,26 @@ final public class MoveGen {
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add(new Move(start, castle));
+                moves.add((castle.value << 14) | start.idx);
             }
         }
         return moves;
     }
 
-    public static List<Move> pseudoLegalForPawn(int[] board,
-                                                Square start,
-                                                Color color,
-                                                Square enPassant) {
-        List<Move> moves = new ArrayList<>();
+    public static List<Integer> pseudoLegalForPawn(int[] board,
+                                                   Square start,
+                                                   Color color,
+                                                   Square enPassant) {
+        // refer to pseudoLegal for breakdown of move representation
+        List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMovesRegular = (Square square) -> {
             if (board[square.idx] != 0) return false;
 
             if (!Square.isPromotion(square,
-                    color)) moves.add(new Move(start,
-                    square));
+                    color)) moves.add((start.idx << 7) | square.idx);
             else {
-                for (Piece piece : Piece.getPromoteTypes()) {
-                    moves.add(new Move(start,
-                            square,
-                            piece));
+                for (Piece pieceType : Piece.getPromoteTypes()) {
+                    moves.add((pieceType.id << 18) | start.idx | square.idx);
                 }
             }
 
@@ -295,13 +290,10 @@ final public class MoveGen {
             if (square != enPassant && board[square.idx] == 0) return false;
             if (Color.extractColor(board[square.idx]) == color) return false;
             if (!Square.isPromotion(square,
-                    color)) moves.add(new Move(start,
-                    square));
+                    color)) moves.add((start.idx << 7) | square.idx);
             else {
-                for (Piece piece : Piece.getPromoteTypes()) {
-                    moves.add(new Move(start,
-                            square,
-                            piece));
+                for (Piece pieceType : Piece.getPromoteTypes()) {
+                    moves.add((pieceType.id << 18) | start.idx | square.idx);
                 }
             }
             return false;

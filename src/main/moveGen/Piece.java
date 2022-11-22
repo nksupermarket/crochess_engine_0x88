@@ -1,8 +1,6 @@
 package main.moveGen;
 
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 public enum Piece {
     NULL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING;

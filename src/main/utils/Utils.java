@@ -17,4 +17,11 @@ final public class Utils {
         }
         return -1;
     }
+
+    public static <T> boolean findValue(T v, T[] collection) {
+        for (T t : collection) {
+            if (t.equals(v)) return true;
+        }
+        return false;
+    }
 }
