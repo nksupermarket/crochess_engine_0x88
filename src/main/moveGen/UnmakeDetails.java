@@ -13,7 +13,7 @@ public class UnmakeDetails {
     public Castle castle;
     public boolean isPromote;
     public int prevCastleRights = 15;
-    public Square prevEnPassant;
+    public Square prevEnPassant = Square.NULL;
     public int prevHalfmoves;
 
     public void reset() {

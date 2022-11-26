@@ -238,7 +238,7 @@ final public class MoveGen {
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add((castle.value << 14) | start.idx);
+                moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
         //queenside castle check
@@ -249,7 +249,7 @@ final public class MoveGen {
                     oppColor,
                     oppPieceMap,
                     board)) {
-                moves.add((castle.value << 14) | start.idx);
+                moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
         return moves;

@@ -2,16 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/moveGen/ZobristKey.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/moveGen/ZobristKeyTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Castle.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Castle.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/moveGen/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/GameState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/moveGen/MoveGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/MoveGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/moveGen/Piece.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/Piece.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/utils/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/UnmakeDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/UnmakeDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/moveGen/ZobristKey.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/moveGen/ZobristKey.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/moveGen/GameStateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/moveGen/GameStateTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/moveGen/MoveGenTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/moveGen/MoveGenTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +57,70 @@
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.MoveGenTest">
+  <component name="RunManager" selected="JUnit.GameStateTest$unmakeDetails$undoZobristHash.promotion">
+    <configuration name="GameStateTest$makeMove$zobristHash.worksForPromotion" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.moveGen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test.moveGen.GameStateTest.makeMove" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest$makeMove$zobristHash" />
+      <option name="METHOD_NAME" value="worksForPromotion" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameStateTest$unmakeDetails$undoZobristHash$castleMoves" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.moveGen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test.moveGen.GameStateTest.unmakeDetails.undoZobristHash" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest$unmakeDetails$undoZobristHash$castleMoves" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameStateTest$unmakeDetails$undoZobristHash.promotion" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.moveGen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test.moveGen.GameStateTest.unmakeDetails" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest$unmakeDetails$undoZobristHash" />
+      <option name="METHOD_NAME" value="promotion" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameStateTest$unmakeDetails$undoZobristHash.worksForCaptures" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.moveGen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test.moveGen.GameStateTest.unmakeDetails" />
+      <option name="MAIN_CLASS_NAME" value="test.moveGen.GameStateTest$unmakeDetails$undoZobristHash" />
+      <option name="METHOD_NAME" value="worksForCaptures" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="GameStateTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
@@ -77,75 +136,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MoveGenTest$pseudoLegalMoves.queenPseudoLegalMovesWorkWithNoObstacles" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.moveGen.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen.MoveGenTest" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.MoveGenTest$pseudoLegalMoves" />
-      <option name="METHOD_NAME" value="queenPseudoLegalMovesWorkWithNoObstacles" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="MoveGenTest$pseudoLegalMoves.rookPseudoLegalMovesWorkWithNoObstacles" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.moveGen.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen.MoveGenTest" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.MoveGenTest$pseudoLegalMoves" />
-      <option name="METHOD_NAME" value="rookPseudoLegalMovesWorkWithNoObstacles" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="MoveGenTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.moveGen.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.MoveGenTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ZobristKeyTest$hashIsUnique" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="test.moveGen.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="test.moveGen.ZobristKeyTest" />
-      <option name="MAIN_CLASS_NAME" value="test.moveGen.ZobristKeyTest$hashIsUnique" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.MoveGenTest" />
-        <item itemvalue="JUnit.MoveGenTest$pseudoLegalMoves.queenPseudoLegalMovesWorkWithNoObstacles" />
-        <item itemvalue="JUnit.MoveGenTest$pseudoLegalMoves.rookPseudoLegalMovesWorkWithNoObstacles" />
+        <item itemvalue="JUnit.GameStateTest$unmakeDetails$undoZobristHash.promotion" />
+        <item itemvalue="JUnit.GameStateTest$unmakeDetails$undoZobristHash$castleMoves" />
+        <item itemvalue="JUnit.GameStateTest$unmakeDetails$undoZobristHash.worksForCaptures" />
         <item itemvalue="JUnit.GameStateTest" />
-        <item itemvalue="JUnit.ZobristKeyTest$hashIsUnique" />
+        <item itemvalue="JUnit.GameStateTest$makeMove$zobristHash.worksForPromotion" />
       </list>
     </recent_temporary>
   </component>
@@ -170,5 +167,13 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="JUnit">
+        <watch expression="zobristHash" language="JAVA" />
+        <watch expression="GameState.zobristHash" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

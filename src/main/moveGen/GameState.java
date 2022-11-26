@@ -15,6 +15,7 @@ final public class GameState {
 
     public static Map<Color, Square[]> pieceList = new HashMap<>();
     public static long zobristHash;
+    public static Map<Long, Integer> totalRepititions = new HashMap<>();
 
     public static Color activeColor = Color.W;
     public static Square enPassant = Square.NULL;
@@ -122,6 +123,11 @@ final public class GameState {
         }
     }
 
+    private static void removeInPieceList(Color color, Square square) {
+        pieceList.get(color)[Utils.findIndexOf(square,
+                pieceList.get(color))] = Square.NULL;
+    }
+
     private static void moveInPieceList(Color color, Square from, Square to) {
         pieceList.get(color)[Utils.findIndexOf(from,
                 pieceList.get(color))] = to;
@@ -219,6 +225,7 @@ final public class GameState {
         moveDetails.prevCastleRights = castleRights;
         moveDetails.prevEnPassant = enPassant;
         moveDetails.prevHalfmoves = halfmoves;
+
         // assume to square is a valid pseudo legal move
 
         /*
@@ -259,6 +266,11 @@ final public class GameState {
                 moveDetails.castle = castle;
                 pieceList.get(activeColor)[50] = castle.square;
                 moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
+
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][from.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rInitSquare.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][castle.square.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rSquare.idx];
             }
         } else if (pieceType == Piece.PAWN && to == enPassant) {
             Square enPassantCaptureSquare = Square.lookup.get(
@@ -281,9 +293,12 @@ final public class GameState {
             } else {
                 board[enPassantCaptureSquare.idx] = 0;
                 moveDetails.capturePieceSquare = enPassantCaptureSquare;
+                // capture is handled later
 
                 moveInPieceList(activeColor, from, to);
-                moveInPieceList(Color.getOppColor(activeColor), enPassantCaptureSquare, Square.NULL);
+
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.PAWN.id - 1][from.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.PAWN.id - 1][to.idx];
             }
         } else {
             if (board[to.idx] != 0) {
@@ -312,39 +327,67 @@ final public class GameState {
                 Square[] list = pieceList.get(activeColor);
                 list[Utils.findIndexOf(from, list)] =
                         Square.NULL;
-                for (int i = 0; i < 10; i++) {
-                    // look for the first open slot
-                    int idx = (promote - 1) * 10 + i;
-                    if (list[idx] == Square.NULL) list[idx] = to;
-                }
+                pushToPieceList(activeColor, Piece.extractPieceType(promote), to);
+
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][from.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][promote - 1][to.idx];
             } else {
                 moveInPieceList(activeColor, from, to);
-                if (moveDetails.capturedPiece != 0) {
-                    moveInPieceList(Color.getOppColor(activeColor), to, Square.NULL);
-                }
+
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceType.id - 1][from.idx];
+                zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceType.id - 1][to.idx];
             }
         }
 
+        if (moveDetails.capturedPiece != 0) {
+            moveInPieceList(oppColor, moveDetails.capturePieceSquare, Square.NULL);
+
+            zobristHash ^= ZobristKey.PIECES[oppColor.ordinal()][(moveDetails.capturedPiece & 7) -
+                    1][moveDetails.capturePieceSquare.idx];
+        }
+
+        if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
         enPassant = Square.NULL;
 
         if (pieceType == Piece.KING) {
             if (activeColor == Color.W) {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
                 castleRights = (castleRights ^ Castle.W_K.value) ^ Castle.W_Q.value;
             } else {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
                 castleRights = (castleRights ^ Castle.B_k.value) ^ Castle.B_q.value;
             }
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[activeColor.ordinal()][0];
         } else {
             if (pieceType == Piece.PAWN) {
-                if (Math.abs(from.idx - to.idx) == 2 * (Vector.UP.offset)) enPassant = Square.lookup.get(
-                        from.idx + (activeColor == Color.W ? Vector.UP.offset : Vector.DOWN.offset)
-                );
+                if (Math.abs(from.idx - to.idx) == 2 * (Vector.UP.offset)) {
+                    enPassant = Square.lookup.get(
+                            from.idx + (activeColor == Color.W ? Vector.UP.offset : Vector.DOWN.offset));
+                    zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
+                }
             }
 
-            // checking if rooks are on their home squares to see if I need to toggle castleRights
-            if (((board[Square.A1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) castleRights ^= Castle.W_Q.value;
-            if (((board[Square.H1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) castleRights ^= Castle.W_K.value;
-            if (((board[Square.A8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) castleRights ^= Castle.B_q.value;
-            if (((board[Square.H8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) castleRights ^= Castle.B_k.value;
+            // checking if rooks moved or have been captured to see if I need to toggle castleRights
+            if (((board[Square.A1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+                castleRights ^= Castle.W_Q.value;
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+            }
+            if (((board[Square.H1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+                castleRights ^= Castle.W_K.value;
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+            }
+            if (((board[Square.A8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+                castleRights ^= Castle.B_q.value;
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+            }
+            if (((board[Square.H8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) {
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+                castleRights ^= Castle.B_k.value;
+                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+            }
         }
 
         moveDetails.from = from;
@@ -353,48 +396,75 @@ final public class GameState {
         if (moveDetails.capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
         else halfmoves = 0;
 
+        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
+        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
 
         return true;
     }
 
     public static void unmakeMove(UnmakeDetails move) {
+
+        if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
         enPassant = move.prevEnPassant;
-        castleRights = move.prevCastleRights;
+        if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
+
+        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
+        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
+
+        zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+        zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+        castleRights = move.prevCastleRights;
+        zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+        zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+
         halfmoves = move.prevHalfmoves;
+
         Color oppColor = Color.getOppColor(activeColor);
+
         if (move.castle != null) {
             board[move.from.idx] = board[move.castle.square.idx];
             board[move.castle.square.idx] = 0;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][move.castle.square.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][move.from.idx];
 
-            Square rookPos = Square.NULL;
-            switch (move.castle) {
-                case W_K -> rookPos = Square.H1;
-                case W_Q -> rookPos = Square.A1;
-                case B_k -> rookPos = Square.H8;
-                case B_q -> rookPos = Square.A8;
-            }
-
-            board[rookPos.idx] = board[move.castle.rSquare.idx];
+            board[move.castle.rInitSquare.idx] = board[move.castle.rSquare.idx];
             board[move.castle.rSquare.idx] = 0;
-            moveInPieceList(activeColor, move.castle.rSquare, rookPos);
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][move.castle.rInitSquare.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][move.castle.rSquare.idx];
+
+            moveInPieceList(activeColor, move.castle.rSquare, move.castle.rInitSquare);
             pieceList.get(activeColor)[50] = move.from;
+
+            return;
+        }
+
+        if (move.isPromote) {
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][(board[move.to.idx] & 7) - 1][move.to.idx];
+            removeInPieceList(activeColor, move.to);
+
+            board[move.from.idx] = activeColor.id | Piece.PAWN.id;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][move.from.idx];
+            pushToPieceList(activeColor, Piece.PAWN, move.from);
         } else {
             board[move.from.idx] = board[move.to.idx];
-            board[move.to.idx] = 0;
             moveInPieceList(activeColor, move.to, move.from);
 
-            if (move.capturedPiece != 0) {
-                board[move.capturePieceSquare.idx] = move.capturedPiece;
-                pushToPieceList(oppColor, Piece.extractPieceType(move.capturedPiece),
-                        move.capturePieceSquare);
-            }
+            int pieceId = board[move.from.idx] & 7;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][move.to.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][move.from.idx];
+        }
 
-            if (move.isPromote) {
-                board[move.from.idx] = activeColor.id | Piece.PAWN.id;
-                pushToPieceList(activeColor, Piece.PAWN, move.from);
-            }
+        if (move.capturedPiece != 0) {
+            board[move.capturePieceSquare.idx] = move.capturedPiece;
+            pushToPieceList(oppColor, Piece.extractPieceType(move.capturedPiece),
+                    move.capturePieceSquare);
+
+            zobristHash ^=
+                    ZobristKey.PIECES[oppColor.ordinal()][(move.capturedPiece & 7) - 1][move.capturePieceSquare.idx];
+        } else {
+            board[move.to.idx] = 0;
         }
     }
 
@@ -446,5 +516,9 @@ final public class GameState {
 
         return Utils.findValue(wPieces, insufficientMaterial.get(bPieces)) || Utils.findValue(bPieces,
                 insufficientMaterial.get(wPieces));
+    }
+
+    public boolean isDrawByRepitition(long mostRecentHash) {
+        return totalRepititions.get(mostRecentHash) != null && totalRepititions.get(mostRecentHash) >= 3;
     }
 }

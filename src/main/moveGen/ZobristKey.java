@@ -1,5 +1,6 @@
 package main.moveGen;
 
+import java.util.Arrays;
 import java.util.Random;
 
 final public class ZobristKey {
@@ -31,7 +32,7 @@ final public class ZobristKey {
                 }
             }
 
-            for (int i = 0; i < CASTLING_RIGHTS.length; i++) {
+            for (int i = 0; i < CASTLING_RIGHTS[0].length; i++) {
                 CASTLING_RIGHTS[color.ordinal()][i] = rdm.nextLong();
             }
         }
@@ -55,6 +56,7 @@ final public class ZobristKey {
 
         if (GameState.enPassant != Square.NULL)
             hash ^= EN_PASSANT[GameState.enPassant.idx];
+
         if (GameState.activeColor == Color.B) hash ^= SIDE;
 
         return hash;
