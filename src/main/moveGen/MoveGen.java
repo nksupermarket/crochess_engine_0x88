@@ -61,7 +61,7 @@ final public class MoveGen {
         List<Integer> moves = new ArrayList<>();
 
         Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
+            if (Color.extractColor(board[square.idx]) == color) return false;
             moves.add((start.idx << 7) | square.idx);
             // return false after capture move has been added
             return board[square.idx] == 0;
@@ -104,7 +104,7 @@ final public class MoveGen {
                 final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
                 for (int jump : KNIGHT_JUMPS) {
                     int jumpIdx = start.idx + jump;
-                    if (Square.isValid(jumpIdx))
+                    if (Square.isValid(jumpIdx) && Color.extractColor(board[jumpIdx]) != color)
                         pushToMoves.apply(Square.lookup.get(jumpIdx));
                 }
                 return moves;
@@ -130,7 +130,8 @@ final public class MoveGen {
 
                 // xor so if the piece on the square is the same as piece variable, the last 3 bits will be 0
                 // if it's not 0, it means the piece has been captured
-                if (oppPieceList[idx] == Square.NULL || ((board[oppPieceList[idx].idx] ^ piece.id) & 7) != 0) break;
+                if (oppPieceList[idx] == Square.NULL || board[oppPieceList[idx].idx] != (oppColor.id | piece.id))
+                    continue;
 
                 int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
                 // need to add 119 so there are no negative indices
@@ -173,7 +174,7 @@ final public class MoveGen {
 
                     case 3 -> {
                         if (piece == Piece.KING) return true;
-                        if (piece == Piece.PAWN && oppColor == Color.W) return true;
+                        if (piece == Piece.PAWN && oppColor == Color.B) return true;
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
@@ -184,7 +185,7 @@ final public class MoveGen {
 
                     case 4 -> {
                         if (piece == Piece.KING) return true;
-                        if (piece == Piece.PAWN && oppColor == Color.B) return true;
+                        if (piece == Piece.PAWN && oppColor == Color.W) return true;
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
                         traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
@@ -219,10 +220,9 @@ final public class MoveGen {
         // refer to pseudoLegal for breakdown of move representation
         List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if (board[square.idx] != 0 && Color.extractColor(board[square.idx]) == color) return false;
+            if (Color.extractColor(board[square.idx]) == color) return false;
             moves.add((start.idx << 7) | square.idx);
-            // return false after capture move has been added
-            return board[square.idx] == 0;
+            return false;
         };
         for (Vector vector : Vector.values()) {
             traverseVectorShort(vector,
@@ -237,7 +237,7 @@ final public class MoveGen {
             if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
                     oppPieceMap,
-                    board)) {
+                    board) && !isAttacked(start, oppColor, oppPieceMap, board)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
@@ -245,10 +245,11 @@ final public class MoveGen {
         if (color == Color.W && (castleRights & 4) != 0 || color == Color.B && (castleRights & 1) != 0) {
             final Castle castle = color == Color.W ? Castle.W_Q : Castle.B_q;
 
-            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 && !isAttacked(castle.rSquare,
+            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 &&
+                    board[castle.rInitSquare.idx + 1] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
                     oppPieceMap,
-                    board)) {
+                    board) && !isAttacked(start, oppColor, oppPieceMap, board)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
@@ -268,17 +269,21 @@ final public class MoveGen {
                     color)) moves.add((start.idx << 7) | square.idx);
             else {
                 for (Piece pieceType : Piece.getPromoteTypes()) {
-                    moves.add((pieceType.id << 18) | start.idx | square.idx);
+                    moves.add(((pieceType.id << 18) | (start.idx << 7)) | square.idx);
                 }
             }
 
-            return false;
+            return true;
         };
+        boolean onStartSquare = start.toString()
+                                     .contains(color == Color.W ? "2" : "7");
         traverseVectorShort(color == Color.W ?
                         Vector.UP :
                         Vector.DOWN,
                 start,
-                pushToMovesRegular);
+                pushToMovesRegular,
+                onStartSquare ? 2 : 1
+        );
 
         final Vector[] captureVectors = color == Color.W ?
                 new Vector[]{Vector.UP_RIGHT, Vector.UP_LEFT} :
@@ -293,7 +298,7 @@ final public class MoveGen {
                     color)) moves.add((start.idx << 7) | square.idx);
             else {
                 for (Piece pieceType : Piece.getPromoteTypes()) {
-                    moves.add((pieceType.id << 18) | start.idx | square.idx);
+                    moves.add(((pieceType.id << 18) | (start.idx << 7)) | square.idx);
                 }
             }
             return false;
@@ -322,6 +327,17 @@ final public class MoveGen {
         int squareIdx = start.idx + vector.offset;
         if (Square.isValid(squareIdx)) {
             cb.apply(Square.lookup.get(squareIdx));
+        }
+    }
+
+    private static void traverseVectorShort(Vector vector,
+                                            Square start,
+                                            Function<Square, Boolean> cb, int range) {
+        int squareIdx = start.idx + vector.offset;
+        while (range != 0) {
+            if (!cb.apply(Square.lookup.get(squareIdx))) break;
+            squareIdx += vector.offset;
+            range--;
         }
     }
 }

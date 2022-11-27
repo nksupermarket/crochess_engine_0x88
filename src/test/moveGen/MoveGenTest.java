@@ -392,9 +392,13 @@ public class MoveGenTest {
             List<Integer> allExpectedMoves = allExpectedList.stream()
                                                             .map((v) -> {
                                                                 if (v == Square.C8)
-                                                                    return ((Castle.B_q.value << 14) | Square.E8.idx);
+                                                                    return ((Castle.B_q.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_q.square.idx);
                                                                 if (v == Square.G8)
-                                                                    return ((Castle.B_k.value << 14) | Square.E8.idx);
+                                                                    return ((Castle.B_k.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_k.square.idx);
 
                                                                 return (Square.E8.idx << 7) | v.idx;
                                                             })

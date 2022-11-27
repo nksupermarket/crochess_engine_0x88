@@ -1,10 +1,7 @@
 package main.moveGen;
 
-import lombok.ToString;
-
 import java.util.Objects;
 
-@ToString()
 public class UnmakeDetails {
     public int capturedPiece;
     public Square capturePieceSquare;

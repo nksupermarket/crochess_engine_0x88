@@ -1,11 +1,5 @@
 package main.utils;
 
-import main.moveGen.Move;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 final public class Utils {
     private Utils() {
     }
