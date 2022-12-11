@@ -1,6 +1,10 @@
-package main.moveGen;
+package main;
 
-import java.util.Arrays;
+import main.Color;
+import main.GameState;
+import main.Piece;
+import main.Square;
+
 import java.util.Random;
 
 final public class ZobristKey {

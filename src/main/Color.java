@@ -1,4 +1,4 @@
-package main.moveGen;
+package main;
 
 public enum Color {
     W(8), B(16);

@@ -1,10 +1,10 @@
 
-package test.moveGen;
+package test;
 
-import main.moveGen.Color;
-import main.moveGen.GameState;
-import main.moveGen.Piece;
-import main.moveGen.ZobristKey;
+import main.Color;
+import main.GameState;
+import main.Piece;
+import main.ZobristKey;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 

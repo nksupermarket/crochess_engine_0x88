@@ -1,15 +1,18 @@
-package main.moveGen;
+package main;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 public enum Piece {
-    NULL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING;
+    NULL(0), PAWN(100), KNIGHT(300), BISHOP(310), ROOK(500), QUEEN(900), KING(10000);
     final public int id;
+    final public int value;
 
-    Piece() {
+
+    Piece(int value) {
         this.id = ordinal();
+        this.value = value;
     }
 
     public static final Map<Integer, Piece> lookup = new HashMap<>();

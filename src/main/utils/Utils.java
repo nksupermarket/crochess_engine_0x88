@@ -1,5 +1,7 @@
 package main.utils;
 
+import main.Square;
+
 final public class Utils {
     private Utils() {
     }
@@ -10,6 +12,18 @@ final public class Utils {
             if (collection[i] == v) return i;
         }
         return -1;
+    }
+
+    public static void printMove(int move) {
+        System.out.printf("%s%s ", Square.lookup.get((move >> 7) & 127),
+                Square.lookup.get(move & 127));
+    }
+
+    public static String convertMove(int move) {
+        return Square.lookup.get((move >> 7) & 127)
+                            .toString() +
+                Square.lookup.get(move & 127)
+                             .toString();
     }
 
     public static <T> boolean findValue(T v, T[] collection) {

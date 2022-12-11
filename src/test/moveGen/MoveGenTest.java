@@ -1,5 +1,6 @@
 package test.moveGen;
 
+import main.*;
 import main.moveGen.*;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
@@ -427,9 +428,13 @@ public class MoveGenTest {
             List<Integer> allExpectedMoves = allExpectedList.stream()
                                                             .map((v) -> {
                                                                 if (v == Square.C1)
-                                                                    return ((Castle.W_Q.value << 14) | Square.E1.idx);
+                                                                    return ((Castle.W_Q.value << 14) |
+                                                                            Square.E1.idx << 7 |
+                                                                            Castle.W_Q.square.idx);
                                                                 if (v == Square.G1)
-                                                                    return ((Castle.W_K.value << 14) | Square.E1.idx);
+                                                                    return ((Castle.W_K.value << 14) |
+                                                                            Square.E1.idx << 7 |
+                                                                            Castle.W_K.square.idx);
 
                                                                 return (Square.E1.idx << 7) | v.idx;
                                                             })
@@ -458,14 +463,19 @@ public class MoveGenTest {
             List<Integer> allExpectedMoves = allExpectedList.stream()
                                                             .map((v) -> {
                                                                 if (v == Square.C8)
-                                                                    return ((Castle.B_q.value << 14) | Square.E8.idx);
+                                                                    return ((Castle.B_q.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_q.square.idx);
                                                                 if (v == Square.G8)
-                                                                    return ((Castle.B_k.value << 14) | Square.E8.idx);
+                                                                    return ((Castle.B_k.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_k.square.idx);
 
                                                                 return (Square.E8.idx << 7) | v.idx;
                                                             })
                                                             .toList();
-
+            System.out.println(moves);
+            System.out.println(allExpectedMoves);
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }

@@ -1,9 +1,12 @@
-package test.moveGen;
+package test;
 
 import jdk.jfr.Description;
+import main.*;
 import main.moveGen.*;
+import main.uci.Uci;
 import main.utils.Utils;
 import org.hamcrest.MatcherAssert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -166,6 +169,16 @@ public class GameStateTest {
         return false;
     }
 
+
+    @Test
+    public void pieceCountIsInitiatedCorrectly() {
+        MatcherAssert.assertThat(GameState.pieceCount.get(Color.W), is(GameState.pieceCount.get((Color.B))));
+        MatcherAssert.assertThat(GameState.pieceCount.get(Color.W), is(
+                8 * Piece.PAWN.value + 2 * Piece.ROOK.value +
+                        2 * Piece.KNIGHT.value + 2 * Piece.BISHOP.value + Piece.QUEEN.value + Piece.KING.value
+        ));
+    }
+
     @Nested
     class filterOutIllegalMoves {
         @Test
@@ -174,7 +187,7 @@ public class GameStateTest {
 
             List<Integer> validMoves = GameState.filterOutValidMoves(MoveGen.pseudoLegalForKing(GameState.board,
                     GameState.pieceList.get(Color.W)[50], Color.W, GameState.castleRights,
-                    GameState.pieceList.get(Color.B)));
+                    GameState.pieceList.get(Color.B)), false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.E1.idx], is(Color.W.id | Piece.KING.id));
             MatcherAssert.assertThat(GameState.board[Square.H1.idx], is(Color.W.id | Piece.ROOK.id));
@@ -188,7 +201,7 @@ public class GameStateTest {
             GameState.loadFen("rnb1kbnr/ppp1pppp/4q3/3p4/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 1");
 
             List<Integer> validMoves = GameState.filterOutValidMoves(MoveGen.pseudoLegalForPawn(GameState.board,
-                    Square.E4, Color.W, GameState.enPassant));
+                    Square.E4, Color.W, GameState.enPassant), false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.B.id | Piece.PAWN.id));
             MatcherAssert.assertThat(GameState.board[Square.E4.idx], is(Color.W.id | Piece.PAWN.id));
@@ -203,7 +216,7 @@ public class GameStateTest {
 
             List<Integer> validMoves = GameState.filterOutValidMoves(MoveGen.pseudoLegalForKing(GameState.board,
                     GameState.pieceList.get(Color.W)[50], Color.W, GameState.castleRights,
-                    GameState.pieceList.get(Color.B)));
+                    GameState.pieceList.get(Color.B)), false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.E2.idx], is(Color.W.id | Piece.KING.id));
 
@@ -212,6 +225,34 @@ public class GameStateTest {
 
             MatcherAssert.assertThat(validMoves.size(), is(3));
             MatcherAssert.assertThat(validMoves.containsAll(expected), is(true));
+        }
+
+        @Test
+        public void onlyCapturesAndOnlyChecks() {
+            GameState.loadFen("r3rk2/pb4p1/4QbBp/1p1q4/2pP4/2P5/PP3PPP/R3R1K1 w - - 0 1");
+
+            Square[] oldWPieceList = GameState.pieceList.get(Color.W)
+                                                        .clone();
+            Square[] oldBPieceList = GameState.pieceList.get(Color.B)
+                                                        .clone();
+            int[] boardCopy = GameState.board.clone();
+            List<Integer> forcingMoves = GameState.getValidMoves(GameState.activeColor, true, true);
+            List<Integer> expected = Arrays.asList((Square.E6.idx << 7) | Square.D5.idx,
+                    (Square.E6.idx << 7) | Square.E8.idx, (Square.E6.idx << 7) | Square.F6.idx,
+                    (Square.E6.idx << 7) | Square.F7.idx, (Square.E6.idx << 7) | Square.G8.idx,
+                    (Square.G6.idx << 7) | Square.E8.idx, (Square.E6.idx << 7) | Square.E7.idx,
+                    (Square.E6.idx << 7) | Square.D6.idx);
+            MatcherAssert.assertThat(forcingMoves.size(), is(expected.size()));
+            MatcherAssert.assertThat(forcingMoves.containsAll(expected), is(true));
+            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList.get(Color.W))
+                                           .equals(Arrays.toString(oldWPieceList)),
+                    is(true));
+            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList.get(Color.B))
+                                           .equals(Arrays.toString(oldBPieceList)),
+                    is(true));
+            MatcherAssert.assertThat(Arrays.toString(GameState.board)
+                                           .equals(Arrays.toString(boardCopy)),
+                    is(true));
         }
     }
 
@@ -243,6 +284,8 @@ public class GameStateTest {
             GameState.makeMove((Square.E4.idx << 7) | Square.D5.idx, unmakeDetails);
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.W.id | Piece.PAWN.id));
             MatcherAssert.assertThat(isPieceOnSquareInPieceList(Piece.PAWN, Color.W, Square.D5), is(true));
+            MatcherAssert.assertThat(GameState.pieceCount.get(Color.W) - GameState.pieceCount.get(Color.B),
+                    is(Piece.PAWN.value));
         }
 
         @Test
@@ -1175,21 +1218,21 @@ public class GameStateTest {
             @Test
             public void includesB7ToB5() {
                 GameState.loadFen("rnbqkbnr/ppp1pppp/8/P2p4/8/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1");
-                MatcherAssert.assertThat(GameState.getValidMoves(Color.B)
+                MatcherAssert.assertThat(GameState.getValidMoves(Color.B, false, false)
                                                   .contains((Square.B7.idx << 7) | Square.B5.idx), is(true));
             }
 
             @Test
             public void includesB5ToC6() {
                 GameState.loadFen("rnbqkbnr/pp1pp1pp/5p2/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 1");
-                MatcherAssert.assertThat(GameState.getValidMoves(Color.W)
+                MatcherAssert.assertThat(GameState.getValidMoves(Color.W, false, false)
                                                   .contains((Square.B5.idx << 7) | Square.C6.idx), is(true));
             }
 
             @Test
             public void kingMovesDontIncludeSquaresProtectedByPawn() {
                 GameState.loadFen("rnbqkbnr/ppp1pppp/8/8/3p4/3P4/PPPKPPPP/RNBQ1BNR w KQkq - 0 1");
-                List<Integer> validMoves = GameState.getValidMoves(Color.W);
+                List<Integer> validMoves = GameState.getValidMoves(Color.W, false, false);
 
                 MatcherAssert.assertThat(validMoves.contains((Square.D2.idx << 7) | Square.C3.idx), is(false));
                 MatcherAssert.assertThat(validMoves.contains((Square.D2.idx << 7) | Square.E3.idx), is(false));
@@ -1198,103 +1241,116 @@ public class GameStateTest {
             @Test
             public void missingEnPassantMove() {
                 GameState.loadFen("rnbqkbnr/2pppppp/p7/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 1");
-                List<Integer> validMoves = GameState.getValidMoves(Color.W);
+                List<Integer> validMoves = GameState.getValidMoves(Color.W, false, false);
 
                 MatcherAssert.assertThat(validMoves.contains((Square.A5.idx << 7) | Square.B6.idx), is(true));
             }
+
+            @Test
+            public void getCaptureMoves() {
+                GameState.loadFen("rnbqkbnr/5ppp/1p1p4/p3N3/P1Pp4/1P6/4PPPP/RNBQKB1R b KQkq - 0 1");
+                List<Integer> validMoves = GameState.getValidMoves(GameState.activeColor, true, false);
+                MatcherAssert.assertThat(validMoves.contains((Square.D6.idx << 7) | Square.E5.idx), is(true));
+            }
         }
 
-        @Test
-        public void onePly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(1), is(20));
-        }
+        @Nested
+        @Disabled
+        class perft {
+            @Test
+            public void onePly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(1), is(20));
+            }
 
-        @Test
-        public void twoPly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(2), is(400));
-        }
+            @Test
+            public void twoPly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(2), is(400));
+            }
 
-        @Test
-        public void threePly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(3), is(8902));
-        }
+            @Test
+            public void threePly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(3), is(8902));
+            }
 
-        @Test
-        public void fourPly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(4), is(197_281));
-        }
+            @Test
+            public void fourPly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(4), is(197_281));
+            }
 
-        @Test
-        public void fivePly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(4_865_609));
-        }
+            @Test
+            public void fivePly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(4_865_609));
+            }
 
-        @Test
-        public void debuggingSixPly() {
-            GameState.loadFen("rnbqkbnr/p1pppppp/8/1P6/8/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1");
-            MatcherAssert.assertThat(GameState.board[Square.B5.idx], is(Color.W.id | Piece.PAWN.id));
-            MatcherAssert.assertThat(GameState.countNumOfPositions(3, true), is(11_204));
-        }
+            @Test
+            public void debuggingSixPly() {
+                GameState.loadFen("rnbqkbnr/p1pppppp/8/1P6/8/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1");
+                MatcherAssert.assertThat(GameState.board[Square.B5.idx], is(Color.W.id | Piece.PAWN.id));
+                MatcherAssert.assertThat(GameState.countNumOfPositions(3), is(11_204));
+            }
 
-        @Test
-        public void debuggingPosition() {
-            GameState.loadFen("rnbqkbnr/2pppppp/p7/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 1");
-            GameState.makeMove((Square.A5.idx << 7) | Square.B6.idx, moveDetails);
+            @Test
+            public void debuggingPosition() {
+                GameState.loadFen("rnbqkbnr/2pppppp/p7/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 1");
+                GameState.makeMove((Square.A5.idx << 7) | Square.B6.idx, moveDetails);
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(1, true), is(19));
-        }
+                MatcherAssert.assertThat(GameState.countNumOfPositions(1), is(19));
+            }
 
-        @Test
-        public void knightsCanCaptureCheckGivers() {
-            GameState.loadFen("r4k1r/p1pNqpb1/bn2pnp1/3P4/1p2P3/1PN2Q1p/P1PBBPPP/R3K2R b KQ - 0 1");
-            List<Integer> validMoves = GameState.getValidMoves(Color.B);
+            @Test
+            public void knightsCanCaptureCheckGivers() {
+                GameState.loadFen("r4k1r/p1pNqpb1/bn2pnp1/3P4/1p2P3/1PN2Q1p/P1PBBPPP/R3K2R b KQ - 0 1");
+                List<Integer> validMoves = GameState.getValidMoves(Color.B, false, false);
 
-            MatcherAssert.assertThat(validMoves.contains((Square.B6.idx << 7) | Square.D7.idx), is(true));
-            MatcherAssert.assertThat(validMoves.contains((Square.F6.idx << 7) | Square.D7.idx), is(true));
-        }
+                MatcherAssert.assertThat(validMoves.contains((Square.B6.idx << 7) | Square.D7.idx), is(true));
+                MatcherAssert.assertThat(validMoves.contains((Square.F6.idx << 7) | Square.D7.idx), is(true));
+            }
 
-        @Test
-        public void sixPly() {
-            MatcherAssert.assertThat(GameState.countNumOfPositions(6, true), is(119_060_324));
-        }
+            @Ignore
+            @Test
+            public void sixPly() {
+                MatcherAssert.assertThat(GameState.countNumOfPositions(6), is(119_060_324));
+            }
 
-        @Test
-        public void position2() {
-            GameState.loadFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            @Test
+            public void position2() {
+                GameState.loadFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(4, true), is(193_690_690));
-        }
+                MatcherAssert.assertThat(GameState.countNumOfPositions(4), is(4_085_603));
+            }
 
-        @Test
-        public void position3() {
-            GameState.loadFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
+            @Test
+            public void position3() {
+                GameState.loadFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(6, true), is(11_030_083));
-        }
+                MatcherAssert.assertThat(GameState.countNumOfPositions(6, true), is(11_030_083));
+            }
 
-        @Test
-        public void position4() {
-            GameState.loadFen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+            @Test
+            public void position4() {
+                GameState.loadFen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(5, true), is(15_833_292));
+                MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(15_833_292));
 
-            GameState.loadFen("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 ");
+                GameState.loadFen("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 ");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(5, true), is(15_833_292));
-        }
+                MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(15_833_292));
+            }
 
-        @Test
-        public void position5() {
-            GameState.loadFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+            @Test
+            public void position5() {
+                GameState.loadFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(5, true), is(89_941_194));
-        }
+                MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(89_941_194));
+            }
 
-        @Test
-        public void position6() {
-            GameState.loadFen("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ");
+            @Ignore
+            @Test
+            public void position6() {
+                GameState.loadFen("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ");
 
-            MatcherAssert.assertThat(GameState.countNumOfPositions(5, true), is(164_075_551));
+                MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(164_075_551));
+            }
         }
     }
 }

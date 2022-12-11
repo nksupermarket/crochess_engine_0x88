@@ -1,5 +1,10 @@
 package main.moveGen;
 
+import main.Castle;
+import main.Color;
+import main.Piece;
+import main.Square;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -61,8 +66,7 @@ final public class MoveGen {
         List<Integer> moves = new ArrayList<>();
 
         Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if (Color.extractColor(board[square.idx]) == color) return false;
-            moves.add((start.idx << 7) | square.idx);
+            if ((board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
             // return false after capture move has been added
             return board[square.idx] == 0;
         };
@@ -104,7 +108,7 @@ final public class MoveGen {
                 final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
                 for (int jump : KNIGHT_JUMPS) {
                     int jumpIdx = start.idx + jump;
-                    if (Square.isValid(jumpIdx) && Color.extractColor(board[jumpIdx]) != color)
+                    if (Square.isValid(jumpIdx) && (board[jumpIdx] & color.id) == 0)
                         pushToMoves.apply(Square.lookup.get(jumpIdx));
                 }
                 return moves;
@@ -114,6 +118,86 @@ final public class MoveGen {
                 return moves;
             }
         }
+    }
+
+    public static boolean isAttackedBy(Square square, Square attackerSquare, int attacker, int[] board) {
+        final boolean[] attacked = {false};
+
+        Function<Square, Boolean> lookForObstacles = (Square newSquare) -> {
+            if (board[newSquare.idx] == 0) return true;
+            if (board[newSquare.idx] == attacker) {
+                attacked[0] = true;
+            }
+            return false;
+        };
+
+        Piece attackerPieceType = Piece.extractPieceType(attacker);
+
+        int delta = square.idx - attackerSquare.idx + Square.H8.idx;
+
+        switch (ATTACK_TABLE[delta]) {
+                   /*   ATTACK_NONE : 0;
+                        ATTACK_KQR : 1;
+                        ATTACK_QR : 2;
+                        ATTACK_KQBwP : 3;
+                        ATTACK_KQBbP : 4;
+                        ATTACK_QB : 5;
+                        ATTACK_N : 6;
+                    */
+            case 1 -> {
+                if (attackerPieceType == Piece.KING) return true;
+                if (attackerPieceType != Piece.ROOK && attackerPieceType != Piece.QUEEN) return false;
+                traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                        square,
+                        lookForObstacles);
+                if (attacked[0]) return true;
+            }
+
+            case 2 -> {
+                if (attackerPieceType != Piece.ROOK && attackerPieceType != Piece.QUEEN) return false;
+
+                traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                        square,
+                        lookForObstacles);
+                if (attacked[0]) return true;
+            }
+
+            case 3 -> {
+                if (attackerPieceType == Piece.KING) return true;
+                if (attackerPieceType == Piece.PAWN && (attacker & 16) != 0) return true;
+                if (attackerPieceType != Piece.BISHOP && attackerPieceType != Piece.QUEEN) return false;
+
+                traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                        square,
+                        lookForObstacles);
+                if (attacked[0]) return true;
+            }
+
+            case 4 -> {
+                if (attackerPieceType == Piece.KING) return true;
+                if (attackerPieceType == Piece.PAWN && (attacker & 8) != 0) return true;
+                if (attackerPieceType != Piece.BISHOP && attackerPieceType != Piece.QUEEN) return false;
+
+                traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                        square,
+                        lookForObstacles);
+                if (attacked[0]) return true;
+            }
+
+            case 5 -> {
+                if (attackerPieceType != Piece.BISHOP && attackerPieceType != Piece.QUEEN) return false;
+
+                traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
+                        square,
+                        lookForObstacles);
+                if (attacked[0]) return true;
+            }
+
+            case 6 -> {
+                if (attackerPieceType == Piece.KNIGHT) return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isAttacked(Square square,
@@ -128,8 +212,6 @@ final public class MoveGen {
                 // need to subtract 1 to account for Piece.NULL
                 int idx = (piece.id - 1) * 10 + i;
 
-                // xor so if the piece on the square is the same as piece variable, the last 3 bits will be 0
-                // if it's not 0, it means the piece has been captured
                 if (oppPieceList[idx] == Square.NULL || board[oppPieceList[idx].idx] != (oppColor.id | piece.id))
                     continue;
 
@@ -138,8 +220,7 @@ final public class MoveGen {
 
                 Function<Square, Boolean> lookForObstacles = (Square newSquare) -> {
                     if (board[newSquare.idx] == 0) return true;
-                    if (Color.extractColor(board[newSquare.idx]) != oppColor) return false;
-                    if (Piece.extractPieceType(board[newSquare.idx]) == piece) {
+                    if (board[newSquare.idx] == (oppColor.id | piece.id)) {
                         attacked[0] = true;
                     }
                     return false;
@@ -220,8 +301,7 @@ final public class MoveGen {
         // refer to pseudoLegal for breakdown of move representation
         List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if (Color.extractColor(board[square.idx]) == color) return false;
-            moves.add((start.idx << 7) | square.idx);
+            if ((board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
             return false;
         };
         for (Vector vector : Vector.values()) {
@@ -293,7 +373,7 @@ final public class MoveGen {
                 };
         Function<Square, Boolean> pushToMovesCapture = (Square square) -> {
             if (square != enPassant && board[square.idx] == 0) return false;
-            if (Color.extractColor(board[square.idx]) == color) return false;
+            if ((board[square.idx] & color.id) != 0) return false;
             if (!Square.isPromotion(square,
                     color)) moves.add((start.idx << 7) | square.idx);
             else {

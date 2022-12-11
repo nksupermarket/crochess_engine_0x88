@@ -1,6 +1,4 @@
-package main.moveGen;
-
-import main.moveGen.Color;
+package main;
 
 import java.util.*;
 
@@ -34,8 +32,7 @@ public enum Square {
     }
 
     private static int getRank(Square square) {
-        return Math.floorDiv(square.idx,
-                16);
+        return square.idx >> 4;
     }
 
     public static boolean isPromotion(Square square,

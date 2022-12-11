@@ -1,5 +1,8 @@
-package main.moveGen;
+package main;
 
+import main.moveGen.MoveGen;
+import main.moveGen.UnmakeDetails;
+import main.moveGen.Vector;
 import main.utils.Utils;
 
 import java.util.*;
@@ -21,9 +24,9 @@ final public class GameState {
     // need to subtract 1 from Piece.id bc Piece enum starts with NULL
 
     public static Map<Color, Square[]> pieceList = new HashMap<>();
+    public static Map<Color, Integer> pieceCount = new HashMap<>();
     public static long zobristHash;
     public static Map<Long, Integer> totalRepititions = new HashMap<>();
-    public static List<Integer> history = new ArrayList<>();
 
     public static Color activeColor = Color.W;
     public static Square enPassant = Square.NULL;
@@ -37,6 +40,8 @@ final public class GameState {
                 new Square[51]);
         pieceList.put(Color.B,
                 new Square[51]);
+        pieceCount.put(Color.W, 0);
+        pieceCount.put(Color.B, 0);
 
         board[0] = Color.W.id | Piece.ROOK.id;
         board[1] = Color.W.id | Piece.KNIGHT.id;
@@ -58,22 +63,22 @@ final public class GameState {
         final Square[] wPieceList = pieceList.get(Color.W);
         Arrays.fill(wPieceList,
                 Square.NULL);
-        wPieceList[0] = Square.A2;
-        wPieceList[1] = Square.B2;
-        wPieceList[2] = Square.C2;
-        wPieceList[3] = Square.D2;
-        wPieceList[4] = Square.E2;
-        wPieceList[5] = Square.F2;
-        wPieceList[6] = Square.G2;
-        wPieceList[7] = Square.H2;
-        wPieceList[10] = Square.B1;
-        wPieceList[11] = Square.G1;
-        wPieceList[20] = Square.C1;
-        wPieceList[21] = Square.F1;
-        wPieceList[30] = Square.A1;
-        wPieceList[31] = Square.H1;
-        wPieceList[40] = Square.D1;
-        wPieceList[50] = Square.E1;
+        putPiece(Color.W, Piece.PAWN, Square.A2);
+        putPiece(Color.W, Piece.PAWN, Square.B2);
+        putPiece(Color.W, Piece.PAWN, Square.C2);
+        putPiece(Color.W, Piece.PAWN, Square.D2);
+        putPiece(Color.W, Piece.PAWN, Square.E2);
+        putPiece(Color.W, Piece.PAWN, Square.F2);
+        putPiece(Color.W, Piece.PAWN, Square.G2);
+        putPiece(Color.W, Piece.PAWN, Square.H2);
+        putPiece(Color.W, Piece.ROOK, Square.A1);
+        putPiece(Color.W, Piece.KNIGHT, Square.B1);
+        putPiece(Color.W, Piece.BISHOP, Square.C1);
+        putPiece(Color.W, Piece.QUEEN, Square.D1);
+        putPiece(Color.W, Piece.KING, Square.E1);
+        putPiece(Color.W, Piece.BISHOP, Square.F1);
+        putPiece(Color.W, Piece.KNIGHT, Square.G1);
+        putPiece(Color.W, Piece.ROOK, Square.H1);
 
         board[112] = Color.B.id | Piece.ROOK.id;
         board[113] = Color.B.id | Piece.KNIGHT.id;
@@ -95,29 +100,69 @@ final public class GameState {
         final Square[] bPieceList = pieceList.get(Color.B);
         Arrays.fill(bPieceList,
                 Square.NULL);
-        bPieceList[0] = Square.A7;
-        bPieceList[1] = Square.B7;
-        bPieceList[2] = Square.C7;
-        bPieceList[3] = Square.D7;
-        bPieceList[4] = Square.E7;
-        bPieceList[5] = Square.F7;
-        bPieceList[6] = Square.G7;
-        bPieceList[7] = Square.H7;
-        bPieceList[10] = Square.B8;
-        bPieceList[11] = Square.G8;
-        bPieceList[20] = Square.C8;
-        bPieceList[21] = Square.F8;
-        bPieceList[30] = Square.A8;
-        bPieceList[31] = Square.H8;
-        bPieceList[40] = Square.D8;
-        bPieceList[50] = Square.E8;
+        putPiece(Color.B, Piece.PAWN, Square.A7);
+        putPiece(Color.B, Piece.PAWN, Square.B7);
+        putPiece(Color.B, Piece.PAWN, Square.C7);
+        putPiece(Color.B, Piece.PAWN, Square.D7);
+        putPiece(Color.B, Piece.PAWN, Square.E7);
+        putPiece(Color.B, Piece.PAWN, Square.F7);
+        putPiece(Color.B, Piece.PAWN, Square.G7);
+        putPiece(Color.B, Piece.PAWN, Square.H7);
+        putPiece(Color.B, Piece.ROOK, Square.A8);
+        putPiece(Color.B, Piece.KNIGHT, Square.B8);
+        putPiece(Color.B, Piece.BISHOP, Square.C8);
+        putPiece(Color.B, Piece.QUEEN, Square.D8);
+        putPiece(Color.B, Piece.KING, Square.E8);
+        putPiece(Color.B, Piece.BISHOP, Square.F8);
+        putPiece(Color.B, Piece.KNIGHT, Square.G8);
+        putPiece(Color.B, Piece.ROOK, Square.H8);
 
         zobristHash = ZobristKey.hash();
     }
 
-    private static void pushToPieceList(Color color,
-                                        Piece piece,
-                                        Square square) {
+    public static void printBoard() {
+        System.out.println();
+        Map<Color, String[]> unicode_pieces = new HashMap<>();
+
+        unicode_pieces.put(Color.W, new String[]{".", "♟︎", "♞", "♝", "♜", "♛", "♚"});
+        unicode_pieces.put(Color.B, new String[]{".", "♙", "♘", "♗", "♖", "♕", "♔"})
+        ;
+        for (int rank = 7; rank >= 0; rank--) {
+            for (int file = 0; file < 16; file++) {
+                // init square
+                int square = rank * 16 + file;
+
+                // print ranks
+                if (file == 0)
+                    System.out.printf(" %d  ", rank + 1);
+
+                // if square is on board
+                if ((square & 0x88) == 0)
+                    System.out.printf("%s ",
+                            GameState.board[square] == 0 ? "." : unicode_pieces.get(
+                                    Color.extractColor(GameState.board[square]))[GameState.board[square] &
+                                    7]);
+            }
+
+            // print new line every time new rank is encountered
+            System.out.print("\n");
+        }
+        System.out.println();
+    }
+
+    public static void printState() {
+        System.out.println(pieceCount);
+        System.out.println(Arrays.toString(pieceList.get(Color.W)));
+        System.out.println(Arrays.toString(pieceList.get(Color.B)));
+        System.out.println(castleRights);
+        System.out.println(enPassant);
+    }
+
+    private static void putPiece(Color color,
+                                 Piece piece,
+                                 Square square) {
+        pieceCount.merge(color, piece.value, Integer::sum);
+
         Square[] list = pieceList.get(color);
 
         int startIdx = (piece.id - 1) * 10;
@@ -131,9 +176,10 @@ final public class GameState {
         }
     }
 
-    private static void removeInPieceList(Color color, Square square) {
-        pieceList.get(color)[Utils.findIndexOf(square,
-                pieceList.get(color))] = Square.NULL;
+    private static void removePiece(Color color, Piece piece, Square square) {
+        pieceCount.merge(color, -piece.value, Integer::sum);
+
+        pieceList.get(color)[Utils.findIndexOf(square, pieceList.get(color))] = Square.NULL;
     }
 
     private static void moveInPieceList(Color color, Square from, Square to) {
@@ -141,13 +187,20 @@ final public class GameState {
                 pieceList.get(color))] = to;
     }
 
-    public static void loadFen(String fen) {
+    private static void resetState() {
         board = new int[128];
 
         Arrays.fill(pieceList.get(Color.W),
                 Square.NULL);
         Arrays.fill(pieceList.get(Color.B),
                 Square.NULL);
+
+        pieceCount.put(Color.W, 0);
+        pieceCount.put(Color.B, 0);
+    }
+
+    public static void loadFen(String fen) {
+        resetState();
 
         Map<Character, Piece> pieceMap = new HashMap<>();
         pieceMap.put('k',
@@ -200,7 +253,7 @@ final public class GameState {
             int idx = rank * 16 + file;
             Piece piece = pieceMap.get(type);
             board[idx] = color.id | piece.id;
-            pushToPieceList(color,
+            putPiece(color,
                     piece,
                     Square.lookup.get(idx));
             file++;
@@ -229,7 +282,21 @@ final public class GameState {
         zobristHash = ZobristKey.hash();
     }
 
-    public static List<Integer> getValidMoves(Color color) {
+    public static boolean inCheck(Color color) {
+
+        Color oppColor = Color.getOppColor(color);
+        return MoveGen.isAttacked(pieceList.get(color)[50],
+                oppColor,
+                pieceList.get(oppColor),
+                board);
+    }
+
+    public static boolean isCheckmate(Color color) {
+        if (inCheck(color)) return getValidMoves(color, false, false).size() == 0;
+        return false;
+    }
+
+    public static List<Integer> getValidMoves(Color color, boolean onlyCaptures, boolean onlyChecks) {
         Square[] list = pieceList.get(color);
 
         List<Integer> moves = new ArrayList<>();
@@ -249,23 +316,29 @@ final public class GameState {
                 ), color));
             }
         }
-        return filterOutValidMoves(moves);
+        return filterOutValidMoves(moves, onlyCaptures, onlyChecks);
     }
 
-    public static List<Integer> filterOutValidMoves(List<Integer> moves) {
+    public static List<Integer> filterOutValidMoves(List<Integer> moves, boolean onlyCaptures, boolean onlyChecks) {
         return moves.stream()
                     .filter((move) -> {
                         Castle castle = Castle.lookup.get((move >> 14) & 15);
                         Square from = Square.lookup.get((move >> 7) & 127);
                         Square to = Square.lookup.get(move & 127);
 
-                        Square kingPos = pieceList.get(activeColor)[50];
-                        Color oppColor = Color.getOppColor(activeColor);
+                        Color color = Color.extractColor(board[from.idx]);
+                        assert color != null;
 
                         Piece pieceType = Piece.extractPieceType(board[from.idx]);
 
-                        if (castle != null) {
+                        if (onlyCaptures && !onlyChecks) {
+                            if (board[to.idx] == 0 || (pieceType == Piece.PAWN && to != enPassant)) return false;
+                        }
 
+                        Square kingPos = pieceList.get(color)[50];
+                        Color oppColor = Color.getOppColor(color);
+
+                        if (castle != null) {
                             board[castle.square.idx] = board[from.idx];
                             board[from.idx] = 0;
                             board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
@@ -275,30 +348,48 @@ final public class GameState {
                                     oppColor,
                                     pieceList.get(oppColor),
                                     board);
+                            if (onlyChecks && !inCheck(oppColor)) {
+                                pieceList.get(activeColor)[50] = castle.square;
+                                moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
+
+                                valid = false;
+
+                                pieceList.get(activeColor)[50] = from;
+                                moveInPieceList(activeColor, castle.rSquare, castle.rInitSquare);
+                            }
 
                             board[from.idx] = board[castle.square.idx];
                             board[castle.square.idx] = 0;
                             board[castle.rInitSquare.idx] = board[castle.rSquare.idx];
                             board[castle.rSquare.idx] = 0;
+
                             return valid;
                         } else if (pieceType == Piece.PAWN && to == enPassant) {
 
                             Square enPassantCaptureSquare = Square.lookup.get(
-                                    to.idx + (activeColor == Color.W ? Vector.DOWN.offset : Vector.UP.offset)
+                                    to.idx + (color == Color.W ? main.moveGen.Vector.DOWN.offset :
+                                            main.moveGen.Vector.UP.offset)
                             );
 
                             board[to.idx] = board[from.idx];
                             board[from.idx] = 0;
                             board[enPassantCaptureSquare.idx] = 0;
 
-                            boolean valid = !MoveGen.isAttacked(kingPos,
-                                    oppColor,
-                                    pieceList.get(oppColor),
-                                    board);
+                            boolean valid = !inCheck(color);
+                            if (onlyChecks) {
+                                moveInPieceList(color, from, to);
+                                removePiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
 
+                                if (!inCheck(oppColor)) valid = false;
+
+                                moveInPieceList(color, to, from);
+                                putPiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
+                            }
+
+                            board[from.idx] = color.id | Piece.PAWN.id;
                             board[to.idx] = 0;
-                            board[from.idx] = activeColor.id | Piece.PAWN.id;
                             board[enPassantCaptureSquare.idx] = oppColor.id | Piece.PAWN.id;
+
                             return valid;
                         } else {
 
@@ -310,18 +401,43 @@ final public class GameState {
                                     oppColor,
                                     pieceList.get(oppColor),
                                     board);
+                            if (onlyChecks) {
+                                int promote = move >> 18;
+                                if (promote != 0) {
+                                    board[to.idx] = color.id | promote;
 
-                            board[from.idx] = activeColor.id | pieceType.id;
+                                    removePiece(color, Piece.PAWN, from);
+                                    putPiece(color, Piece.extractPieceType(promote), to);
+                                } else {
+                                    if (capturedPiece != 0) removePiece(oppColor, Piece.extractPieceType(capturedPiece),
+                                            to);
+                                    moveInPieceList(color, from, to);
+                                }
+                                if (onlyCaptures) {
+                                    if (capturedPiece == 0 && !inCheck(oppColor)) valid = false;
+                                } else if (!inCheck(oppColor)) valid = false;
+
+                                if (promote != 0) {
+                                    removePiece(color, Piece.extractPieceType(board[to.idx]), to);
+                                    putPiece(color, Piece.PAWN, from);
+                                } else {
+                                    if (capturedPiece != 0) putPiece(oppColor, Piece.extractPieceType(capturedPiece),
+                                            to);
+                                    moveInPieceList(color, to, from);
+                                }
+                            }
+
+                            board[from.idx] = color.id | pieceType.id;
                             board[to.idx] = capturedPiece;
+
                             return valid;
                         }
                     })
                     .collect(Collectors.toList());
     }
 
-    public static void makeMove(Integer move, UnmakeDetails moveDetails) {
-        history.add(move);
 
+    public static void makeMove(Integer move, UnmakeDetails moveDetails) {
         moveDetails.prevCastleRights = castleRights;
         moveDetails.prevEnPassant = enPassant;
         moveDetails.prevHalfmoves = halfmoves;
@@ -355,14 +471,6 @@ final public class GameState {
 
             moveDetails.castle = castle;
             pieceList.get(activeColor)[50] = castle.square;
-            if (Utils.findIndexOf(castle.rInitSquare, pieceList.get(activeColor)) == -1) {
-                System.out.println(castleRights);
-                System.out.println(Arrays.toString(pieceList.get(activeColor)));
-                for (int i = 0; i < history.size(); i++) {
-                    System.out.printf("%s%s%n", Square.lookup.get((history.get(i) >> 7)),
-                            Square.lookup.get((history.get(i) & 127)));
-                }
-            }
             moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
 
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][from.idx];
@@ -371,7 +479,7 @@ final public class GameState {
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rSquare.idx];
         } else if (pieceType == Piece.PAWN && to == enPassant) {
             Square enPassantCaptureSquare = Square.lookup.get(
-                    to.idx + (activeColor == Color.W ? Vector.DOWN.offset : Vector.UP.offset)
+                    to.idx + (activeColor == Color.W ? main.moveGen.Vector.DOWN.offset : main.moveGen.Vector.UP.offset)
             );
             moveDetails.capturedPiece = board[enPassantCaptureSquare.idx];
 
@@ -399,14 +507,8 @@ final public class GameState {
                 moveDetails.isPromote = true;
                 board[to.idx] = activeColor.id | promote;
 
-                if ((Utils.findIndexOf(from, pieceList.get(activeColor)) == -1)) {
-                    System.out.println(move);
-                    System.out.println(from);
-                    System.out.println(to);
-                    System.out.println(Arrays.toString(pieceList.get(activeColor)));
-                }
-                removeInPieceList(activeColor, from);
-                pushToPieceList(activeColor, Piece.extractPieceType(promote), to);
+                removePiece(activeColor, Piece.PAWN, from);
+                putPiece(activeColor, Piece.extractPieceType(promote), to);
 
                 zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][from.idx];
                 zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][promote - 1][to.idx];
@@ -419,7 +521,11 @@ final public class GameState {
         }
 
         if (moveDetails.capturedPiece != 0) {
-            removeInPieceList(oppColor, moveDetails.capturePieceSquare);
+            if (Utils.findIndexOf(moveDetails.capturePieceSquare, pieceList.get(oppColor)) == -1) {
+                System.out.println(Arrays.toString(board));
+                GameState.printBoard();
+            }
+            removePiece(oppColor, Piece.extractPieceType(moveDetails.capturedPiece), moveDetails.capturePieceSquare);
 
             zobristHash ^= ZobristKey.PIECES[oppColor.ordinal()][(moveDetails.capturedPiece & 7) -
                     1][moveDetails.capturePieceSquare.idx];
@@ -447,9 +553,9 @@ final public class GameState {
 
             zobristHash ^= ZobristKey.CASTLING_RIGHTS[activeColor.ordinal()][0];
         } else {
-            if (pieceType == Piece.PAWN && Math.abs(from.idx - to.idx) == 2 * (Vector.UP.offset)) {
+            if (pieceType == Piece.PAWN && Math.abs(from.idx - to.idx) == 2 * (main.moveGen.Vector.UP.offset)) {
                 enPassant = Square.lookup.get(
-                        from.idx + (activeColor == Color.W ? Vector.UP.offset : Vector.DOWN.offset));
+                        from.idx + (activeColor == Color.W ? main.moveGen.Vector.UP.offset : Vector.DOWN.offset));
                 zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
             }
 
@@ -479,7 +585,6 @@ final public class GameState {
         if (moveDetails.capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
         else halfmoves = 0;
 
-        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
 
@@ -487,7 +592,6 @@ final public class GameState {
     }
 
     public static void unmakeMove(UnmakeDetails move) {
-        history.remove(history.size() - 1);
 
         if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
         enPassant = move.prevEnPassant;
@@ -495,7 +599,6 @@ final public class GameState {
 
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
-        if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
 
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
@@ -526,12 +629,12 @@ final public class GameState {
 
         if (move.isPromote) {
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][(board[move.to.idx] & 7) - 1][move.to.idx];
+            removePiece(activeColor, Piece.extractPieceType(board[move.to.idx]), move.to);
             board[move.to.idx] = 0;
-            removeInPieceList(activeColor, move.to);
 
             board[move.from.idx] = activeColor.id | Piece.PAWN.id;
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][move.from.idx];
-            pushToPieceList(activeColor, Piece.PAWN, move.from);
+            putPiece(activeColor, Piece.PAWN, move.from);
         } else {
             board[move.from.idx] = board[move.to.idx];
             board[move.to.idx] = 0;
@@ -544,7 +647,7 @@ final public class GameState {
 
         if (move.capturedPiece != 0) {
             board[move.capturePieceSquare.idx] = move.capturedPiece;
-            pushToPieceList(oppColor, Piece.extractPieceType(move.capturedPiece),
+            putPiece(oppColor, Piece.extractPieceType(move.capturedPiece),
                     move.capturePieceSquare);
 
             zobristHash ^=
@@ -614,7 +717,7 @@ final public class GameState {
         if (depth == 0) return 1;
         int count = 0;
         UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getValidMoves(activeColor);
+        List<Integer> moves = getValidMoves(activeColor, false, false);
         for (Integer move : moves) {
             int moveCount = 0;
             makeMove(move, moveDetails);
@@ -635,7 +738,7 @@ final public class GameState {
         if (depth == 0) return 1;
         int count = 0;
         UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getValidMoves(activeColor);
+        List<Integer> moves = getValidMoves(activeColor, false, false);
         for (Integer move : moves) {
             makeMove(move, moveDetails);
             count += countNumOfPositions(depth - 1);

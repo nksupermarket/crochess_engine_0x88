@@ -1,5 +1,8 @@
 package main.moveGen;
 
+import main.Castle;
+import main.Square;
+
 import java.util.Objects;
 
 public class UnmakeDetails {
