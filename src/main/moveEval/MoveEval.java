@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 final public class MoveEval {
-    private static final Map<Long, Integer> transpositionTable = new HashMap<>();
-
     private MoveEval() {
     }
 
@@ -27,8 +25,9 @@ final public class MoveEval {
             {0, 55, 54, 53, 52, 51, 50}, // victim Q, attacker none, p, n , b, r, q, k
             {0, 0, 0, 0, 0, 0, 0},       // victim K, attacker none, p, n , b, r, q, k
     };
+    final static int TTMOVE_SORT_VAL = 60;
 
-    private static int[] scoreMoves(List<Integer> moves) {
+    private static int[] scoreMoves(List<Integer> moves, int ttMove) {
         int[] scores = new int[moves.size()];
 
         for (int i = 0; i < moves.size(); i++) {
@@ -40,6 +39,7 @@ final public class MoveEval {
             if (attacker == Piece.PAWN.id && to == GameState.enPassant.idx) capture = 1;
 
             scores[i] = MVV_LVA[capture][attacker];
+            if (moves.get(i) == ttMove) scores[i] += TTMOVE_SORT_VAL;
         }
 
         return scores;
@@ -60,26 +60,32 @@ final public class MoveEval {
         Collections.swap(moveList, startIdx, bestScoreIdx);
     }
 
-    public static int getBestMove() {
+    public static int getBestMove(int depth) {
+        TranspositionTable.age = GameState.halfmoves;
+        int ttMove = TranspositionTable.probeMove(GameState.zobristHash, depth);
+
         UnmakeDetails moveDetails = new UnmakeDetails();
         int bestMove = 0;
         int alpha = Integer.MIN_VALUE + 1;
         List<Integer> legalMoves = GameState.getValidMoves(GameState.activeColor, false, false);
-        int[] scores = scoreMoves(legalMoves);
+        int[] scores = scoreMoves(legalMoves, ttMove);
 
         for (int i = 0; i < legalMoves.size(); i++) {
             pickMove(legalMoves, scores, i);
             GameState.makeMove(legalMoves.get(i), moveDetails);
-            int eval = transpositionTable.get(GameState.zobristHash) != null ?
-                    transpositionTable.get(GameState.zobristHash) : -alphaBeta(1, Integer.MIN_VALUE + 1, -alpha);
+            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, depth, alpha, -alpha);
+            int eval = ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -alphaBeta(depth - 1,
+                    Integer.MIN_VALUE + 1, -alpha);
 
-            transpositionTable.putIfAbsent(GameState.zobristHash, eval);
-            GameState.unmakeMove(moveDetails);
             if (eval > alpha) {
                 alpha = eval;
                 bestMove = legalMoves.get(i);
-            }
+                TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, eval, bestMove);
+            } else TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.ALPHA, alpha, 0);
+
+            GameState.unmakeMove(moveDetails);
         }
+        TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, alpha, bestMove);
         return bestMove;
     }
 
@@ -100,14 +106,16 @@ final public class MoveEval {
         List<Integer> forcingMoves = GameState.getValidMoves(GameState.activeColor, true, true);
         for (int move : forcingMoves) {
             GameState.makeMove(move, moveDetails);
-            int eval = transpositionTable.get(GameState.zobristHash) != null ?
-                    transpositionTable.get(GameState.zobristHash) : -quiescence(-beta, -alpha);
-            GameState.unmakeMove(moveDetails);
+            int eval = -quiescence(-beta, -alpha);
 
-            if (eval >= beta)
+            if (eval >= beta) {
+                GameState.unmakeMove(moveDetails);
                 return beta;
+            }
             if (eval > alpha)
                 alpha = eval;
+
+            GameState.unmakeMove(moveDetails);
         }
 
         return alpha;
@@ -115,26 +123,32 @@ final public class MoveEval {
 
     private static int alphaBeta(int depth, int alpha, int beta) {
         if (depth == 0) return quiescence(alpha, beta);
+        int ttMove = TranspositionTable.probeMove(GameState.zobristHash, depth);
 
         List<Integer> legalMoves = GameState.getValidMoves(GameState.activeColor, false, false);
         if (legalMoves.size() == 0) return -100000;
         UnmakeDetails moveDetails = new UnmakeDetails();
-        int[] scores = scoreMoves(legalMoves);
+        int[] scores = scoreMoves(legalMoves, ttMove);
 
         for (int i = 0; i < scores.length; i++) {
             pickMove(legalMoves, scores, i);
             GameState.makeMove(legalMoves.get(i), moveDetails);
-            int eval = transpositionTable.get(GameState.zobristHash) != null ?
-                    transpositionTable.get(GameState.zobristHash) : -alphaBeta(depth - 1, -beta, -alpha);
+            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, depth, alpha, beta);
+            int eval =
+                    ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -alphaBeta(depth - 1,
+                            -beta, -alpha);
 
-            transpositionTable.putIfAbsent(GameState.zobristHash, eval);
-            GameState.unmakeMove(moveDetails);
-
-            if (eval >= beta)
+            if (eval >= beta) {
+                TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.BETA, beta, 0);
+                GameState.unmakeMove(moveDetails);
                 return beta;
-            if (eval > alpha) {
-                alpha = eval;
             }
+            if (eval > alpha) {
+                TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, eval, legalMoves.get(i));
+                alpha = eval;
+            } else TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.ALPHA, alpha, 0);
+
+            GameState.unmakeMove(moveDetails);
         }
 
         return alpha;

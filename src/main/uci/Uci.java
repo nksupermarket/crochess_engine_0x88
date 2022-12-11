@@ -138,7 +138,7 @@ public class Uci {
 
     public static void inputGo() {
         //search for best move
-        int bestMove = MoveEval.getBestMove();
+        int bestMove = MoveEval.getBestMove(5);
         String algebra = moveToAlgebra(bestMove);
         System.out.println("bestmove " + algebra);
     }
