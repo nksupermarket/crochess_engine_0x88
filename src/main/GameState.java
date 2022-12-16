@@ -6,14 +6,12 @@ import main.moveGen.Vector;
 import main.utils.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 final public class GameState {
     private GameState() {
     }
 
     public static void main(String[] args) {
-
         loadFen(args[1]);
         System.out.println(countNumOfPositions(Integer.parseInt(args[0]), true));
     }
@@ -158,9 +156,9 @@ final public class GameState {
         System.out.println(enPassant);
     }
 
-    private static void putPiece(Color color,
-                                 Piece piece,
-                                 Square square) {
+    public static void putPiece(Color color,
+                                Piece piece,
+                                Square square) {
         pieceCount.merge(color, piece.value, Integer::sum);
 
         Square[] list = pieceList.get(color);
@@ -176,13 +174,13 @@ final public class GameState {
         }
     }
 
-    private static void removePiece(Color color, Piece piece, Square square) {
+    public static void removePiece(Color color, Piece piece, Square square) {
         pieceCount.merge(color, -piece.value, Integer::sum);
 
         pieceList.get(color)[Utils.findIndexOf(square, pieceList.get(color))] = Square.NULL;
     }
 
-    private static void moveInPieceList(Color color, Square from, Square to) {
+    public static void moveInPieceList(Color color, Square from, Square to) {
         pieceList.get(color)[Utils.findIndexOf(from,
                 pieceList.get(color))] = to;
     }
@@ -278,12 +276,11 @@ final public class GameState {
                 Square.NULL;
 
         halfmoves = Integer.parseInt(fenState[4]);
-
         zobristHash = ZobristKey.hash();
+        totalRepititions.put(zobristHash, 1);
     }
 
     public static boolean inCheck(Color color) {
-
         Color oppColor = Color.getOppColor(color);
         return MoveGen.isAttacked(pieceList.get(color)[50],
                 oppColor,
@@ -292,11 +289,22 @@ final public class GameState {
     }
 
     public static boolean isCheckmate(Color color) {
-        if (inCheck(color)) return getValidMoves(color, false, false).size() == 0;
-        return false;
+        if (!inCheck(color)) return false;
+
+        UnmakeDetails moveDetails = new UnmakeDetails();
+        for (int move : getPseudoLegalMoves(color)) {
+            makeMove(move, moveDetails);
+            if (!inCheck(color)) {
+                unmakeMove(moveDetails);
+                return false;
+            }
+
+            unmakeMove(moveDetails);
+        }
+        return true;
     }
 
-    public static List<Integer> getValidMoves(Color color, boolean onlyCaptures, boolean onlyChecks) {
+    public static List<Integer> getPseudoLegalMoves(Color color) {
         Square[] list = pieceList.get(color);
 
         List<Integer> moves = new ArrayList<>();
@@ -316,126 +324,8 @@ final public class GameState {
                 ), color));
             }
         }
-        return filterOutValidMoves(moves, onlyCaptures, onlyChecks);
+        return moves;
     }
-
-    public static List<Integer> filterOutValidMoves(List<Integer> moves, boolean onlyCaptures, boolean onlyChecks) {
-        return moves.stream()
-                    .filter((move) -> {
-                        Castle castle = Castle.lookup.get((move >> 14) & 15);
-                        Square from = Square.lookup.get((move >> 7) & 127);
-                        Square to = Square.lookup.get(move & 127);
-
-                        Color color = Color.extractColor(board[from.idx]);
-                        assert color != null;
-
-                        Piece pieceType = Piece.extractPieceType(board[from.idx]);
-
-                        if (onlyCaptures && !onlyChecks) {
-                            if (board[to.idx] == 0 || (pieceType == Piece.PAWN && to != enPassant)) return false;
-                        }
-
-                        Square kingPos = pieceList.get(color)[50];
-                        Color oppColor = Color.getOppColor(color);
-
-                        if (castle != null) {
-                            board[castle.square.idx] = board[from.idx];
-                            board[from.idx] = 0;
-                            board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
-                            board[castle.rInitSquare.idx] = 0;
-
-                            boolean valid = !MoveGen.isAttacked(to,
-                                    oppColor,
-                                    pieceList.get(oppColor),
-                                    board);
-                            if (onlyChecks && !inCheck(oppColor)) {
-                                pieceList.get(activeColor)[50] = castle.square;
-                                moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
-
-                                valid = false;
-
-                                pieceList.get(activeColor)[50] = from;
-                                moveInPieceList(activeColor, castle.rSquare, castle.rInitSquare);
-                            }
-
-                            board[from.idx] = board[castle.square.idx];
-                            board[castle.square.idx] = 0;
-                            board[castle.rInitSquare.idx] = board[castle.rSquare.idx];
-                            board[castle.rSquare.idx] = 0;
-
-                            return valid;
-                        } else if (pieceType == Piece.PAWN && to == enPassant) {
-
-                            Square enPassantCaptureSquare = Square.lookup.get(
-                                    to.idx + (color == Color.W ? main.moveGen.Vector.DOWN.offset :
-                                            main.moveGen.Vector.UP.offset)
-                            );
-
-                            board[to.idx] = board[from.idx];
-                            board[from.idx] = 0;
-                            board[enPassantCaptureSquare.idx] = 0;
-
-                            boolean valid = !inCheck(color);
-                            if (onlyChecks) {
-                                moveInPieceList(color, from, to);
-                                removePiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
-
-                                if (!inCheck(oppColor)) valid = false;
-
-                                moveInPieceList(color, to, from);
-                                putPiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
-                            }
-
-                            board[from.idx] = color.id | Piece.PAWN.id;
-                            board[to.idx] = 0;
-                            board[enPassantCaptureSquare.idx] = oppColor.id | Piece.PAWN.id;
-
-                            return valid;
-                        } else {
-
-                            int capturedPiece = board[to.idx];
-                            board[to.idx] = board[from.idx];
-                            board[from.idx] = 0;
-
-                            boolean valid = !MoveGen.isAttacked(pieceType == Piece.KING ? to : kingPos,
-                                    oppColor,
-                                    pieceList.get(oppColor),
-                                    board);
-                            if (onlyChecks) {
-                                int promote = move >> 18;
-                                if (promote != 0) {
-                                    board[to.idx] = color.id | promote;
-
-                                    removePiece(color, Piece.PAWN, from);
-                                    putPiece(color, Piece.extractPieceType(promote), to);
-                                } else {
-                                    if (capturedPiece != 0) removePiece(oppColor, Piece.extractPieceType(capturedPiece),
-                                            to);
-                                    moveInPieceList(color, from, to);
-                                }
-                                if (onlyCaptures) {
-                                    if (capturedPiece == 0 && !inCheck(oppColor)) valid = false;
-                                } else if (!inCheck(oppColor)) valid = false;
-
-                                if (promote != 0) {
-                                    removePiece(color, Piece.extractPieceType(board[to.idx]), to);
-                                    putPiece(color, Piece.PAWN, from);
-                                } else {
-                                    if (capturedPiece != 0) putPiece(oppColor, Piece.extractPieceType(capturedPiece),
-                                            to);
-                                    moveInPieceList(color, to, from);
-                                }
-                            }
-
-                            board[from.idx] = color.id | pieceType.id;
-                            board[to.idx] = capturedPiece;
-
-                            return valid;
-                        }
-                    })
-                    .collect(Collectors.toList());
-    }
-
 
     public static void makeMove(Integer move, UnmakeDetails moveDetails) {
         moveDetails.prevCastleRights = castleRights;
@@ -592,6 +482,7 @@ final public class GameState {
     }
 
     public static void unmakeMove(UnmakeDetails move) {
+        totalRepititions.merge(zobristHash, -1, Integer::sum);
 
         if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
         enPassant = move.prevEnPassant;
@@ -654,62 +545,76 @@ final public class GameState {
                     ZobristKey.PIECES[oppColor.ordinal()][(move.capturedPiece & 7) - 1][move.capturePieceSquare.idx];
         }
 
-        totalRepititions.merge(zobristHash, -1, Integer::sum);
         move.reset();
     }
 
     public static boolean isDrawByInsufficientMaterial() {
-        /*
-        insufficientMaterial represents possible draw combinations, each int representing the sum of the piece ids
+        int wBishopCount = 0;
+        Color wBishopColor = null;
+        int bBishopCount = 0;
+        Color bBishopColor = null;
+        int wKnightCount = 0;
+        int bKnightCount = 0;
 
-        if there is more than two of one kind of piece return false
-        if there is a pawn, rook, or queen on the board return false
+        for (int i = 0; i < pieceList.get(activeColor).length; i++) {
+            int pieceId = (i / 10) + 1;
+            Piece pieceType = Piece.lookup.get(pieceId);
 
-        else add the piece id to the wPieces/bPieces
-        check if the combination exists in insufficientMaterial
-         */
-        Map<Integer, Integer[]> insufficientMaterial = new HashMap<>();
-        insufficientMaterial.put(Piece.KING.id, new Integer[]{
-                Piece.BISHOP.id + Piece.KING.id,
-                Piece.KNIGHT.id + Piece.KING.id, Piece.KING.id
-        });
-        insufficientMaterial.put(Piece.BISHOP.id + Piece.KING.id, new Integer[]{Piece.BISHOP.id + Piece.KING.id});
+            switch (pieceType) {
+                case BISHOP -> {
+                    if (pieceList.get(Color.W)[i] != Square.NULL) {
+                        if (bKnightCount != 0) return false;
+                        if (wBishopCount == 1) return false;
+                        wBishopCount++;
 
-        int wPieces = Piece.KING.id;
-        int bPieces = Piece.KING.id;
-
-        for (Piece pieceType : Piece.values()) {
-            if (pieceType == Piece.NULL || pieceType == Piece.KING) continue;
-            int startIdx = (pieceType.id - 1) * 10;
-            for (int i = 0; i < 10; i++) {
-                switch (pieceType) {
-
-                    case KNIGHT, BISHOP -> {
-                        if (pieceList.get(Color.W)[startIdx + i] != Square.NULL) {
-                            // if there are two pieces of the same type it's not a draw
-                            wPieces += pieceType.id;
-                            if (wPieces > 9) return false;
-                        }
-                        if (pieceList.get(Color.B)[startIdx + i] != Square.NULL) {
-                            bPieces += pieceType.id;
-                            if (bPieces > 9) return false;
-                        }
+                        wBishopColor = Square.getColor(pieceList.get(Color.W)[i]);
+                        if (wBishopColor == bBishopColor) return false;
                     }
+                    if (pieceList.get(Color.B)[i] != Square.NULL) {
+                        if (wKnightCount != 0) return false;
+                        if (bBishopCount == 1) return false;
+                        bBishopCount++;
 
-                    default -> {
-                        if (pieceList.get(Color.W)[startIdx + i] != Square.NULL ||
-                                pieceList.get(Color.B)[startIdx + i] != Square.NULL) return false;
+                        bBishopColor = Square.getColor(pieceList.get(Color.B)[i]);
+                        if (wBishopColor == bBishopColor) return false;
                     }
+                }
+
+                case KNIGHT -> {
+                    if (pieceList.get(Color.W)[i] != Square.NULL) {
+                        wKnightCount++;
+                    }
+                    if (pieceList.get(Color.B)[i] != Square.NULL) {
+                        bKnightCount++;
+                    }
+                    if (wKnightCount + bKnightCount == 2) return false;
+                }
+
+                case KING -> {
+                }
+
+                default -> {
+                    if (pieceList.get(Color.W)[i] != Square.NULL ||
+                            pieceList.get(Color.B)[i] != Square.NULL) return false;
                 }
             }
         }
 
-        return Utils.findValue(wPieces, insufficientMaterial.get(bPieces)) || Utils.findValue(bPieces,
-                insufficientMaterial.get(wPieces));
+        return true;
     }
 
     public static boolean isDrawByRepitition(long mostRecentHash) {
-        return totalRepititions.get(mostRecentHash) != null && totalRepititions.get(mostRecentHash) >= 3;
+        return totalRepititions.get(mostRecentHash) == 3;
+    }
+
+    public static boolean isDrawByMoveRule() {
+        int MAX_MOVES = 100;
+        return halfmoves == MAX_MOVES;
+    }
+
+    public static boolean isDraw() {
+        return false;
+//        return isDrawByMoveRule() || isDrawByRepitition(GameState.zobristHash) || isDrawByInsufficientMaterial();
     }
 
     public static int countNumOfPositions(int depth, boolean print) {
@@ -717,10 +622,14 @@ final public class GameState {
         if (depth == 0) return 1;
         int count = 0;
         UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getValidMoves(activeColor, false, false);
+        List<Integer> moves = getPseudoLegalMoves(activeColor);
         for (Integer move : moves) {
             int moveCount = 0;
             makeMove(move, moveDetails);
+            if (inCheck(activeColor)) {
+                unmakeMove(moveDetails);
+                continue;
+            }
             moveCount += countNumOfPositions(depth - 1);
             count += moveCount;
             if (print) {
@@ -738,9 +647,13 @@ final public class GameState {
         if (depth == 0) return 1;
         int count = 0;
         UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getValidMoves(activeColor, false, false);
+        List<Integer> moves = getPseudoLegalMoves(activeColor);
         for (Integer move : moves) {
             makeMove(move, moveDetails);
+            if (inCheck(Color.getOppColor(activeColor))) {
+                unmakeMove(moveDetails);
+                continue;
+            }
             count += countNumOfPositions(depth - 1);
             unmakeMove(moveDetails);
             moveDetails.reset();

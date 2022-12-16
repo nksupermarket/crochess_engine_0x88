@@ -35,6 +35,14 @@ public enum Square {
         return square.idx >> 4;
     }
 
+    private static int getFile(Square square) {
+        return square.idx & 7;
+    }
+
+    public static Color getColor(Square square) {
+        return (getFile(square) + getRank(square)) % 2 == 0 ? Color.B : Color.W;
+    }
+
     public static boolean isPromotion(Square square,
                                       Color color) {
         int rank = getRank(square);

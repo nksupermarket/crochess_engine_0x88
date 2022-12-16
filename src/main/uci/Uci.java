@@ -16,8 +16,6 @@ public class Uci {
             String inputStr = input.nextLine();
             if ("uci".equals(inputStr)) {
                 inputUCI();
-            } else if (inputStr.startsWith("setoption")) {
-                inputSetOption(inputStr);
             } else if ("isready".equals(inputStr)) {
                 inputIsReady();
             } else if ("ucinewgame".equals(inputStr)) {
@@ -40,10 +38,6 @@ public class Uci {
         System.out.println("id author alex");
         //options go here
         System.out.println("uciok");
-    }
-
-    public static void inputSetOption(String inputString) {
-        //set options
     }
 
     public static void inputIsReady() {

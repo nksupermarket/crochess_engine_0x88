@@ -23,7 +23,6 @@ public class MoveEvalTest {
         int bestMove = MoveEval.getBestMove(5);
         int repeat = MoveEval.getBestMove(5);
         Utils.printMove(bestMove);
-        System.out.println();
         Utils.printMove(repeat);
 
         MatcherAssert.assertThat(bestMove, is(repeat));
@@ -50,6 +49,21 @@ public class MoveEvalTest {
             int bestMove = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(bestMove, is((Square.G3.idx << 7) | Square.F1.idx));
         }
+
+        @Test
+        @Ignore
+        public void mateIn4() {
+            GameState.loadFen("r1bqr2k/ppp3bp/2np2p1/8/2BnPQ2/2N2N2/PPPB1PP1/2KR3R w - - 0 0");
+            int move1 = MoveEval.getBestMove(5);
+            Utils.printMove(move1);
+            MatcherAssert.assertThat(move1, is((Square.H1.idx << 7) | Square.H7.idx));
+            int move2 = MoveEval.getBestMove(5);
+            MatcherAssert.assertThat(move2, is((Square.H8.idx << 7) | Square.H7.idx));
+            int move3 = MoveEval.getBestMove(5);
+            MatcherAssert.assertThat(move3, is((Square.F4.idx << 7) | Square.H2.idx));
+            int move4 = MoveEval.getBestMove(5);
+            MatcherAssert.assertThat(move4, is((Square.D8.idx << 7) | Square.H4.idx));
+        }
     }
 
     @Nested
@@ -63,19 +77,20 @@ public class MoveEvalTest {
 
         @Test
         public void posDebug() {
-            GameState.loadFen("2bqkb1r/r2n1ppp/3p4/3Qp1P1/P3P3/8/5P1P/RNB1K1NR b KQk - 0 16 \u0000");
+            GameState.loadFen("4k3/8/r2p1n2/P3p3/3pP2R/R7/4K3/8 w - - 19 52 \u0000");
             Utils.printMove(MoveEval.getBestMove(5));
+            MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
         }
 
         @Test
         public void seriesDebug() {
             Uci.inputPosition(
-                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4");
+                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5 b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4");
             MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
             Uci.inputPosition(
-                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4");
+                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5 b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4 e6e5");
             MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
         }
