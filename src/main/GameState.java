@@ -6,6 +6,7 @@ import main.moveGen.Vector;
 import main.utils.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 final public class GameState {
     private GameState() {
@@ -289,19 +290,147 @@ final public class GameState {
     }
 
     public static boolean isCheckmate(Color color) {
-        if (!inCheck(color)) return false;
+        return inCheck(color) && getValidMoves(color, false, false).size() == 0;
+    }
 
-        UnmakeDetails moveDetails = new UnmakeDetails();
-        for (int move : getPseudoLegalMoves(color)) {
-            makeMove(move, moveDetails);
-            if (!inCheck(color)) {
-                unmakeMove(moveDetails);
-                return false;
+    public static List<Integer> getValidMoves(Color color, boolean onlyCaptures, boolean onlyChecks) {
+        Square[] list = pieceList.get(color);
+
+        List<Integer> moves = new ArrayList<>();
+
+        for (int idx = 0; idx < list.length; idx++) {
+            if (list[idx] == Square.NULL) continue;
+
+            if (idx == 50) {
+                moves.addAll(MoveGen.pseudoLegalForKing(board, list[50], color, castleRights,
+                        pieceList.get(Color.getOppColor(color))));
+            } else if (idx < 10) {
+                moves.addAll(
+                        MoveGen.pseudoLegalForPawn(board, list[idx], color, enPassant));
+            } else {
+                moves.addAll(MoveGen.pseudoLegal(board, list[idx], Piece.lookup.get(
+                        (int) Math.floor((float) idx / 10) + 1
+                ), color));
             }
-
-            unmakeMove(moveDetails);
         }
-        return true;
+        return filterOutValidMoves(moves, onlyCaptures, onlyChecks);
+    }
+
+    public static List<Integer> filterOutValidMoves(List<Integer> moves, boolean onlyCaptures, boolean onlyChecks) {
+        return moves.stream()
+                    .filter((move) -> {
+                        Castle castle = Castle.lookup.get((move >> 14) & 15);
+                        Square from = Square.lookup.get((move >> 7) & 127);
+                        Square to = Square.lookup.get(move & 127);
+
+                        Color color = Color.extractColor(board[from.idx]);
+                        assert color != null;
+
+                        Piece pieceType = Piece.extractPieceType(board[from.idx]);
+
+                        if (onlyCaptures && !onlyChecks) {
+                            if (board[to.idx] == 0 || (pieceType == Piece.PAWN && to != enPassant)) return false;
+                        }
+
+                        Square kingPos = pieceList.get(color)[50];
+                        Color oppColor = Color.getOppColor(color);
+
+                        if (castle != null) {
+                            board[castle.square.idx] = board[from.idx];
+                            board[from.idx] = 0;
+                            board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
+                            board[castle.rInitSquare.idx] = 0;
+
+                            boolean valid = !MoveGen.isAttacked(to,
+                                    oppColor,
+                                    pieceList.get(oppColor),
+                                    board);
+                            if (onlyChecks && !inCheck(oppColor)) {
+                                pieceList.get(activeColor)[50] = castle.square;
+                                moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
+
+                                valid = false;
+
+                                pieceList.get(activeColor)[50] = from;
+                                moveInPieceList(activeColor, castle.rSquare, castle.rInitSquare);
+                            }
+
+                            board[from.idx] = board[castle.square.idx];
+                            board[castle.square.idx] = 0;
+                            board[castle.rInitSquare.idx] = board[castle.rSquare.idx];
+                            board[castle.rSquare.idx] = 0;
+
+                            return valid;
+                        } else if (pieceType == Piece.PAWN && to == enPassant) {
+
+                            Square enPassantCaptureSquare = Square.lookup.get(
+                                    to.idx + (color == Color.W ? main.moveGen.Vector.DOWN.offset :
+                                            main.moveGen.Vector.UP.offset)
+                            );
+
+                            board[to.idx] = board[from.idx];
+                            board[from.idx] = 0;
+                            board[enPassantCaptureSquare.idx] = 0;
+
+                            boolean valid = !inCheck(color);
+                            if (onlyChecks) {
+                                moveInPieceList(color, from, to);
+                                removePiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
+
+                                if (!inCheck(oppColor)) valid = false;
+
+                                moveInPieceList(color, to, from);
+                                putPiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
+                            }
+
+                            board[from.idx] = color.id | Piece.PAWN.id;
+                            board[to.idx] = 0;
+                            board[enPassantCaptureSquare.idx] = oppColor.id | Piece.PAWN.id;
+
+                            return valid;
+                        } else {
+
+                            int capturedPiece = board[to.idx];
+                            board[to.idx] = board[from.idx];
+                            board[from.idx] = 0;
+
+                            boolean valid = !MoveGen.isAttacked(pieceType == Piece.KING ? to : kingPos,
+                                    oppColor,
+                                    pieceList.get(oppColor),
+                                    board);
+                            if (onlyChecks) {
+                                int promote = move >> 18;
+                                if (promote != 0) {
+                                    board[to.idx] = color.id | promote;
+
+                                    removePiece(color, Piece.PAWN, from);
+                                    putPiece(color, Piece.extractPieceType(promote), to);
+                                } else {
+                                    if (capturedPiece != 0) removePiece(oppColor, Piece.extractPieceType(capturedPiece),
+                                            to);
+                                    moveInPieceList(color, from, to);
+                                }
+                                if (onlyCaptures) {
+                                    if (capturedPiece == 0 && !inCheck(oppColor)) valid = false;
+                                } else if (!inCheck(oppColor)) valid = false;
+
+                                if (promote != 0) {
+                                    removePiece(color, Piece.extractPieceType(board[to.idx]), to);
+                                    putPiece(color, Piece.PAWN, from);
+                                } else {
+                                    if (capturedPiece != 0) putPiece(oppColor, Piece.extractPieceType(capturedPiece),
+                                            to);
+                                    moveInPieceList(color, to, from);
+                                }
+                            }
+
+                            board[from.idx] = color.id | pieceType.id;
+                            board[to.idx] = capturedPiece;
+
+                            return valid;
+                        }
+                    })
+                    .collect(Collectors.toList());
     }
 
     public static List<Integer> getPseudoLegalMoves(Color color) {

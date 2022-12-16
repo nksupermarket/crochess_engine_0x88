@@ -54,7 +54,7 @@ public class MoveEvalTest {
         @Ignore
         public void mateIn4() {
             GameState.loadFen("r1bqr2k/ppp3bp/2np2p1/8/2BnPQ2/2N2N2/PPPB1PP1/2KR3R w - - 0 0");
-            int move1 = MoveEval.getBestMove(5);
+            int move1 = MoveEval.getBestMove(8);
             Utils.printMove(move1);
             MatcherAssert.assertThat(move1, is((Square.H1.idx << 7) | Square.H7.idx));
             int move2 = MoveEval.getBestMove(5);
