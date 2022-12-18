@@ -1,17 +1,13 @@
 package test.moveEval;
 
-import jdk.jfr.Description;
 import main.*;
 import main.moveEval.MoveEval;
-import main.moveGen.*;
 import main.uci.Uci;
 import main.utils.Utils;
 import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 

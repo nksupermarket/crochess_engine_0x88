@@ -80,6 +80,10 @@ final public class MoveGen {
         }
     }
 
+    private static void addSlidingPieceMoves(List<Integer> moveList, Vector[] vectors) {
+
+    }
+
     public static List<Integer> pseudoLegal(int[] board,
                                             Square start,
                                             Piece pieceType,
