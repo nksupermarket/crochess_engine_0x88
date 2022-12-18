@@ -485,7 +485,7 @@ public class MoveGenTest {
         GameState.loadFen("rnbqkbn1/pppppppp/6r1/8/8/5N2/PPPPPP1P/RNBQK2R w KQkq - 0 1");
 
         boolean attacked =
-                MoveGen.isAttacked(Castle.W_K.square, Color.B, GameState.pieceList.get(Color.B), GameState.board);
+                MoveGen.isAttacked(Castle.W_K.square, Color.B, GameState.pieceList.get(Color.B));
 
         MatcherAssert.assertThat(attacked, is(true));
     }

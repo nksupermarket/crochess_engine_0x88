@@ -284,8 +284,8 @@ final public class GameState {
         Color oppColor = Color.getOppColor(color);
         return MoveGen.isAttacked(pieceList.get(color)[50],
                 oppColor,
-                pieceList.get(oppColor),
-                board);
+                pieceList.get(oppColor)
+        );
     }
 
     public static boolean isCheckmate(Color color) {
@@ -348,8 +348,7 @@ final public class GameState {
 
                 valid = !MoveGen.isAttacked(to,
                         oppColor,
-                        pieceList.get(oppColor),
-                        board);
+                        pieceList.get(oppColor));
                 if (onlyChecks) {
                     pieceList.get(activeColor)[50] = castle.square;
 
@@ -398,8 +397,7 @@ final public class GameState {
 
                 valid = !MoveGen.isAttacked(pieceType == Piece.KING ? to : kingPos,
                         oppColor,
-                        pieceList.get(oppColor),
-                        board);
+                        pieceList.get(oppColor));
                 if (onlyChecks) {
                     int promote = move >> 18;
                     if (promote != 0) {

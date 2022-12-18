@@ -144,8 +144,8 @@ final public class MoveGen {
 
     public static boolean isAttacked(Square square,
                                      Color oppColor,
-                                     Square[] oppPieceList,
-                                     int[] board) {
+                                     Square[] oppPieceList
+    ) {
         final boolean[] attacked = {false};
         for (Piece piece : Piece.values()) {
             if (piece == Piece.NULL) continue;
@@ -154,15 +154,16 @@ final public class MoveGen {
                 // need to subtract 1 to account for Piece.NULL
                 int idx = (piece.id - 1) * 10 + i;
 
-                if (oppPieceList[idx] == Square.NULL || board[oppPieceList[idx].idx] != (oppColor.id | piece.id))
+                if (oppPieceList[idx] == Square.NULL ||
+                        GameState.board[oppPieceList[idx].idx] != (oppColor.id | piece.id))
                     continue;
 
                 int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
                 // need to add 119 so there are no negative indices
 
                 Function<Square, Boolean> lookForObstacles = (Square newSquare) -> {
-                    if (board[newSquare.idx] == 0) return true;
-                    if (board[newSquare.idx] == (oppColor.id | piece.id)) {
+                    if (GameState.board[newSquare.idx] == 0) return true;
+                    if (GameState.board[newSquare.idx] == (oppColor.id | piece.id)) {
                         attacked[0] = true;
                     }
                     return false;
@@ -259,8 +260,7 @@ final public class MoveGen {
             if (GameState.board[castle.square.idx] == 0 && GameState.board[castle.rSquare.idx] == 0 &&
                     !isAttacked(castle.rSquare,
                             oppColor,
-                            oppPieceMap,
-                            GameState.board) && !isAttacked(start, oppColor, oppPieceMap, GameState.board)) {
+                            oppPieceMap) && !isAttacked(start, oppColor, oppPieceMap)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
@@ -272,8 +272,7 @@ final public class MoveGen {
             if (GameState.board[castle.square.idx] == 0 && GameState.board[castle.rSquare.idx] == 0 &&
                     GameState.board[castle.rInitSquare.idx + 1] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
-                    oppPieceMap,
-                    GameState.board) && !isAttacked(start, oppColor, oppPieceMap, GameState.board)) {
+                    oppPieceMap) && !isAttacked(start, oppColor, oppPieceMap)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
