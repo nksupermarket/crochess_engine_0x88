@@ -144,8 +144,7 @@ public class MoveGenTest {
 
             List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
-                    Color.W,
-                    null
+                    Color.W
             );
 
             Square[] allExpected = {Square.E5};
@@ -164,8 +163,7 @@ public class MoveGenTest {
 
             List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
-                    Color.W,
-                    null
+                    Color.W
             );
 
             Square[] allExpected = {Square.D5, Square.F5, Square.E5};
@@ -184,8 +182,7 @@ public class MoveGenTest {
 
             List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E5,
-                    Color.B,
-                    null
+                    Color.B
             );
 
             Square[] allExpected = {Square.D4, Square.F4, Square.E4};
@@ -204,8 +201,7 @@ public class MoveGenTest {
 
             List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E5,
-                    Color.B,
-                    null
+                    Color.B
             );
 
             Square[] allExpected = {Square.D4, Square.F4};
@@ -220,12 +216,11 @@ public class MoveGenTest {
 
         @Test
         public void pawnPseudoLegalMovesWorksForEnPassant() {
-            GameState.loadFen("8/8/8/8/4p3/8/8/8 w KQkq - 0 1");
+            GameState.loadFen("8/8/8/8/4p3/8/8/8 w KQkq d3 0 1");
 
             List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
-                    Color.B,
-                    Square.D3
+                    Color.B
             );
 
             Square[] allExpected = {Square.D3, Square.E3};
@@ -473,7 +468,7 @@ public class MoveGenTest {
                                                                 return (Square.E8.idx << 7) | v.idx;
                                                             })
                                                             .toList();
-            
+
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }

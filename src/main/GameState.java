@@ -304,7 +304,7 @@ final public class GameState {
                 moves.addAll(MoveGen.pseudoLegalForKing(list[50], color, pieceList.get(Color.getOppColor(color))));
             } else if (idx < 10) {
                 moves.addAll(
-                        MoveGen.pseudoLegalForPawn(list[idx], color, enPassant));
+                        MoveGen.pseudoLegalForPawn(list[idx], color));
             } else {
                 moves.addAll(MoveGen.pseudoLegal(list[idx], Piece.lookup.get(
                         (int) Math.floor((float) idx / 10) + 1
@@ -441,7 +441,7 @@ final public class GameState {
                         pieceList.get(Color.getOppColor(color))));
             } else if (idx < 10) {
                 moves.addAll(
-                        MoveGen.pseudoLegalForPawn(list[idx], color, enPassant));
+                        MoveGen.pseudoLegalForPawn(list[idx], color));
             } else {
                 moves.addAll(MoveGen.pseudoLegal(list[idx], Piece.lookup.get(
                         (int) Math.floor((float) idx / 10) + 1

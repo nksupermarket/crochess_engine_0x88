@@ -200,7 +200,7 @@ public class GameStateTest {
         public void cantMovePinnedPieceAwayFromPin() {
             GameState.loadFen("rnb1kbnr/ppp1pppp/4q3/3p4/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForPawn(Square.E4, Color.W, GameState.enPassant);
+            List<Integer> validMoves = MoveGen.pseudoLegalForPawn(Square.E4, Color.W);
             GameState.filterOutValidMoves(validMoves, false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.B.id | Piece.PAWN.id));
@@ -1208,7 +1208,7 @@ public class GameStateTest {
             public void position3() {
                 GameState.loadFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
 
-                MatcherAssert.assertThat(GameState.countNumOfPositions(6, true), is(11_030_083));
+                MatcherAssert.assertThat(GameState.countNumOfPositions(6), is(11_030_083));
             }
 
             @Test

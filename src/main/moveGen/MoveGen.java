@@ -50,37 +50,7 @@ final public class MoveGen {
             0, -17, 0, 0, -15, 0, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0, 0, -17
     };
 
-    private static void traverseVectorLong(Vector vector,
-                                           Square start,
-                                           Function<Square, Boolean> cb) {
-        int squareIdx = start.idx + vector.offset;
-        while (Square.isValid(squareIdx)) {
-            if (!cb.apply(Square.lookup.get(squareIdx))) break;
-            squareIdx = squareIdx + vector.offset;
-        }
-    }
-
-    private static void traverseVectorShort(Vector vector,
-                                            Square start,
-                                            Function<Square, Boolean> cb) {
-        int squareIdx = start.idx + vector.offset;
-        if (Square.isValid(squareIdx)) {
-            cb.apply(Square.lookup.get(squareIdx));
-        }
-    }
-
-    private static void traverseVectorShort(Vector vector,
-                                            Square start,
-                                            Function<Square, Boolean> cb, int range) {
-        int squareIdx = start.idx + vector.offset;
-        while (range != 0) {
-            if (!cb.apply(Square.lookup.get(squareIdx))) break;
-            squareIdx += vector.offset;
-            range--;
-        }
-    }
-
-    private static void addSlidingPieceMoves(Square start, Color color, List<Integer> moveList, Vector[] vectors) {
+    private static void pushSlidingPieceMoves(Square start, Color color, List<Integer> moveList, Vector[] vectors) {
         for (Vector vector : vectors) {
             int squareIdx = start.idx + vector.offset;
             while (Square.isValid(squareIdx)) {
@@ -107,13 +77,13 @@ final public class MoveGen {
 
         switch (pieceType) {
             case QUEEN -> {
-                addSlidingPieceMoves(start, color, moves, Vector.values());
+                pushSlidingPieceMoves(start, color, moves, Vector.values());
                 return moves;
             }
 
             case ROOK -> {
                 final Vector[] XY_VECTORS = {Vector.UP, Vector.DOWN, Vector.LEFT, Vector.RIGHT};
-                addSlidingPieceMoves(start, color, moves, XY_VECTORS);
+                pushSlidingPieceMoves(start, color, moves, XY_VECTORS);
                 return moves;
             }
 
@@ -122,7 +92,7 @@ final public class MoveGen {
                         Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT,
                         Vector.DOWN_RIGHT
                 };
-                addSlidingPieceMoves(start, color, moves, DIAGONAL_VECTORS);
+                pushSlidingPieceMoves(start, color, moves, DIAGONAL_VECTORS);
                 return moves;
             }
 
@@ -219,7 +189,7 @@ final public class MoveGen {
 
                     case 5 -> {
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
-                        
+
                         if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
                                 oppColor.id | piece.id)) return true;
                     }
@@ -239,14 +209,11 @@ final public class MoveGen {
             Square[] oppPieceMap) {
         // refer to pseudoLegal for breakdown of move representation
         List<Integer> moves = new ArrayList<>();
-        Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if ((GameState.board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
-            return false;
-        };
+
         for (Vector vector : Vector.values()) {
-            traverseVectorShort(vector,
-                    start,
-                    pushToMoves);
+            int squareIdx = start.idx + vector.offset;
+            if (!Square.isValid(squareIdx)) continue;
+            if ((GameState.board[squareIdx] & color.id) == 0) moves.add((start.idx << 7) | squareIdx);
         }
 
         // kingside castle check
@@ -277,34 +244,58 @@ final public class MoveGen {
         return moves;
     }
 
-    public static List<Integer> pseudoLegalForPawn(
-            Square start,
-            Color color,
-            Square enPassant) {
-        // refer to pseudoLegal for breakdown of move representation
-        List<Integer> moves = new ArrayList<>();
-        Function<Square, Boolean> pushToMovesRegular = (Square square) -> {
-            if (GameState.board[square.idx] != 0) return false;
+    private static void pushRegularPawnMoves(List<Integer> moveList, Square start, Color color, boolean jumpTwo) {
+        Vector vector = color == Color.W ? Vector.UP : Vector.DOWN;
+        int squareIdx = start.idx + vector.offset;
+        Square square = Square.lookup.get(squareIdx);
 
+        if (GameState.board[squareIdx] != 0) return;
+
+        if (!Square.isPromotion(square,
+                color)) moveList.add((start.idx << 7) | squareIdx);
+        else {
+            for (Piece pieceType : Piece.getPromoteTypes()) {
+                moveList.add(((pieceType.id << 18) | (start.idx << 7)) | squareIdx);
+            }
+        }
+
+        if (jumpTwo) {
+            squareIdx += vector.offset;
+
+            if (GameState.board[squareIdx] != 0) return;
+            moveList.add((start.idx << 7) | squareIdx);
+        }
+    }
+
+    private static void pushCapturePawnMoves(List<Integer> moveList, Vector[] captureVectors, Square start,
+                                             Color color) {
+        for (Vector vector : captureVectors) {
+            int squareIdx = start.idx + vector.offset;
+
+            if (!Square.isValid(squareIdx)) continue;
+
+            Square square = Square.lookup.get(squareIdx);
+            if (square != GameState.enPassant && GameState.board[square.idx] == 0) continue;
+            if ((GameState.board[square.idx] & color.id) != 0) continue;
             if (!Square.isPromotion(square,
-                    color)) moves.add((start.idx << 7) | square.idx);
+                    color)) moveList.add((start.idx << 7) | square.idx);
             else {
                 for (Piece pieceType : Piece.getPromoteTypes()) {
-                    moves.add(((pieceType.id << 18) | (start.idx << 7)) | square.idx);
+                    moveList.add(((pieceType.id << 18) | (start.idx << 7)) | square.idx);
                 }
             }
+        }
+    }
 
-            return true;
-        };
+    public static List<Integer> pseudoLegalForPawn(
+            Square start,
+            Color color) {
+        // refer to pseudoLegal for breakdown of move representation
+        List<Integer> moves = new ArrayList<>();
+
         boolean onStartSquare = start.toString()
                                      .contains(color == Color.W ? "2" : "7");
-        traverseVectorShort(color == Color.W ?
-                        Vector.UP :
-                        Vector.DOWN,
-                start,
-                pushToMovesRegular,
-                onStartSquare ? 2 : 1
-        );
+        pushRegularPawnMoves(moves, start, color, onStartSquare);
 
         final Vector[] captureVectors = color == Color.W ?
                 new Vector[]{Vector.UP_RIGHT, Vector.UP_LEFT} :
@@ -312,128 +303,7 @@ final public class MoveGen {
                         Vector.DOWN_RIGHT,
                         Vector.DOWN_LEFT
                 };
-        Function<Square, Boolean> pushToMovesCapture = (Square square) -> {
-            if (square != enPassant && GameState.board[square.idx] == 0) return false;
-            if ((GameState.board[square.idx] & color.id) != 0) return false;
-            if (!Square.isPromotion(square,
-                    color)) moves.add((start.idx << 7) | square.idx);
-            else {
-                for (Piece pieceType : Piece.getPromoteTypes()) {
-                    moves.add(((pieceType.id << 18) | (start.idx << 7)) | square.idx);
-                }
-            }
-            return false;
-        };
-        for (Vector vector : captureVectors) {
-            traverseVectorShort(vector,
-                    start,
-                    pushToMovesCapture);
-        }
+        pushCapturePawnMoves(moves, captureVectors, start, color);
         return moves;
-    }
-
-    private static boolean moveIsCheck(int move) {
-        Castle castle = Castle.lookup.get((move >> 14) & 15);
-        Square from = Square.lookup.get((move >> 7) & 127);
-        Square to = Square.lookup.get(move & 127);
-
-        Color color = Color.extractColor(GameState.board[from.idx]);
-        assert color != null;
-
-        Piece pieceType = Piece.extractPieceType(GameState.board[from.idx]);
-        Color oppColor = Color.getOppColor(color);
-
-        if (castle != null) {
-            GameState.board[castle.square.idx] = GameState.board[from.idx];
-            GameState.board[from.idx] = 0;
-            GameState.board[castle.rSquare.idx] = GameState.board[castle.rInitSquare.idx];
-            GameState.board[castle.rInitSquare.idx] = 0;
-
-            GameState.pieceList.get(GameState.activeColor)[50] = castle.square;
-            GameState.moveInPieceList(GameState.activeColor, castle.rInitSquare, castle.rSquare);
-
-            boolean valid = GameState.inCheck(oppColor);
-
-            GameState.pieceList.get(GameState.activeColor)[50] = from;
-            GameState.moveInPieceList(GameState.activeColor, castle.rSquare, castle.rInitSquare);
-
-            GameState.board[from.idx] = GameState.board[castle.square.idx];
-            GameState.board[castle.square.idx] = 0;
-            GameState.board[castle.rInitSquare.idx] = GameState.board[castle.rSquare.idx];
-            GameState.board[castle.rSquare.idx] = 0;
-
-            return valid;
-        } else if (pieceType == Piece.PAWN && to == GameState.enPassant) {
-
-            Square enPassantCaptureSquare = Square.lookup.get(
-                    to.idx + (color == Color.W ? Vector.DOWN.offset :
-                            Vector.UP.offset)
-            );
-
-            GameState.board[to.idx] = GameState.board[from.idx];
-            GameState.board[from.idx] = 0;
-            GameState.board[enPassantCaptureSquare.idx] = 0;
-
-            boolean valid = !GameState.inCheck(oppColor);
-            GameState.moveInPieceList(color, from, to);
-            GameState.removePiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
-
-            GameState.moveInPieceList(color, to, from);
-            GameState.putPiece(oppColor, Piece.PAWN, enPassantCaptureSquare);
-
-            GameState.board[from.idx] = color.id | Piece.PAWN.id;
-            GameState.board[to.idx] = 0;
-            GameState.board[enPassantCaptureSquare.idx] = oppColor.id | Piece.PAWN.id;
-
-            return valid;
-        } else {
-
-            int capturedPiece = GameState.board[to.idx];
-            GameState.board[to.idx] = GameState.board[from.idx];
-            GameState.board[from.idx] = 0;
-
-            int promote = move >> 18;
-            if (promote != 0) {
-                GameState.board[to.idx] = color.id | promote;
-
-                GameState.removePiece(color, Piece.PAWN, from);
-                GameState.putPiece(color, Piece.extractPieceType(promote), to);
-            } else {
-                if (capturedPiece != 0) GameState.removePiece(oppColor, Piece.extractPieceType(capturedPiece),
-                        to);
-                GameState.moveInPieceList(color, from, to);
-            }
-
-            boolean valid = GameState.inCheck(oppColor);
-
-            if (promote != 0) {
-                GameState.removePiece(color, Piece.extractPieceType(GameState.board[to.idx]), to);
-                GameState.putPiece(color, Piece.PAWN, from);
-            } else {
-                if (capturedPiece != 0) GameState.putPiece(oppColor, Piece.extractPieceType(capturedPiece),
-                        to);
-                GameState.moveInPieceList(color, to, from);
-            }
-
-            GameState.board[from.idx] = color.id | pieceType.id;
-            GameState.board[to.idx] = capturedPiece;
-
-            return valid;
-        }
-    }
-
-    public static void filterOut(List<Integer> moveList, boolean captures, boolean checks) {
-        Iterator<Integer> moveIterator = moveList.iterator();
-        while (moveIterator.hasNext()) {
-            int move = moveIterator.next();
-            Square from = Square.lookup.get((move >> 7) & 127);
-            Square to = Square.lookup.get(move & 127);
-            Piece pieceType = Piece.extractPieceType(GameState.board[from.idx]);
-
-            boolean moveIsCapture =
-                    GameState.board[to.idx] == 0 || (pieceType == Piece.PAWN && to != GameState.enPassant);
-
-            if ((captures && !moveIsCapture) && (checks && !moveIsCheck(move))) moveIterator.remove();
-        }
     }
 }
