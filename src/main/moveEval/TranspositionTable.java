@@ -1,7 +1,5 @@
 package main.moveEval;
 
-import main.moveGen.UnmakeDetails;
-
 import java.util.Map;
 import java.util.HashMap;
 

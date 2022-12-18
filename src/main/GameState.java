@@ -1,12 +1,10 @@
 package main;
 
 import main.moveGen.MoveGen;
-import main.moveGen.UnmakeDetails;
 import main.moveGen.Vector;
 import main.utils.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 final public class GameState {
     private GameState() {
@@ -456,11 +454,7 @@ final public class GameState {
         return moves;
     }
 
-    public static void makeMove(Integer move, UnmakeDetails moveDetails) {
-        moveDetails.prevCastleRights = castleRights;
-        moveDetails.prevEnPassant = enPassant;
-        moveDetails.prevHalfmoves = halfmoves;
-
+    public static int makeMove(Integer move) {
         // assume to square is a valid pseudo legal move
 
         /*
@@ -475,8 +469,8 @@ final public class GameState {
         Square to = Square.lookup.get(move & 127);
         int promote = move >> 18;
 
-        moveDetails.from = from;
-        moveDetails.to = to;
+        int capturedPiece = 0;
+        Square capturePieceSquare = null;
 
         Color oppColor = Color.getOppColor(activeColor);
 
@@ -488,7 +482,6 @@ final public class GameState {
             board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
             board[castle.rInitSquare.idx] = 0;
 
-            moveDetails.castle = castle;
             pieceList.get(activeColor)[50] = castle.square;
             moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
 
@@ -500,13 +493,13 @@ final public class GameState {
             Square enPassantCaptureSquare = Square.lookup.get(
                     to.idx + (activeColor == Color.W ? main.moveGen.Vector.DOWN.offset : main.moveGen.Vector.UP.offset)
             );
-            moveDetails.capturedPiece = board[enPassantCaptureSquare.idx];
+            capturedPiece = board[enPassantCaptureSquare.idx];
 
             board[to.idx] = board[from.idx];
             board[from.idx] = 0;
             board[enPassantCaptureSquare.idx] = 0;
 
-            moveDetails.capturePieceSquare = enPassantCaptureSquare;
+            capturePieceSquare = enPassantCaptureSquare;
             // capture is handled later
 
             moveInPieceList(activeColor, from, to);
@@ -515,15 +508,14 @@ final public class GameState {
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.PAWN.id - 1][to.idx];
         } else {
             if (board[to.idx] != 0) {
-                moveDetails.capturedPiece = board[to.idx];
-                moveDetails.capturePieceSquare = to;
+                capturedPiece = board[to.idx];
+                capturePieceSquare = to;
             }
 
             board[to.idx] = board[from.idx];
             board[from.idx] = 0;
 
             if (promote != 0) {
-                moveDetails.isPromote = true;
                 board[to.idx] = activeColor.id | promote;
 
                 removePiece(activeColor, Piece.PAWN, from);
@@ -539,15 +531,15 @@ final public class GameState {
             }
         }
 
-        if (moveDetails.capturedPiece != 0) {
-            if (Utils.findIndexOf(moveDetails.capturePieceSquare, pieceList.get(oppColor)) == -1) {
+        if (capturedPiece != 0) {
+            if (Utils.findIndexOf(capturePieceSquare, pieceList.get(oppColor)) == -1) {
                 System.out.println(Arrays.toString(board));
                 GameState.printBoard();
             }
-            removePiece(oppColor, Piece.extractPieceType(moveDetails.capturedPiece), moveDetails.capturePieceSquare);
+            removePiece(oppColor, Piece.extractPieceType(capturedPiece), capturePieceSquare);
 
-            zobristHash ^= ZobristKey.PIECES[oppColor.ordinal()][(moveDetails.capturedPiece & 7) -
-                    1][moveDetails.capturePieceSquare.idx];
+            zobristHash ^= ZobristKey.PIECES[oppColor.ordinal()][(capturedPiece & 7) -
+                    1][capturePieceSquare.idx];
         }
 
         if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
@@ -601,86 +593,97 @@ final public class GameState {
             zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
         }
 
-        if (moveDetails.capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
+        if (capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
         else halfmoves = 0;
 
         activeColor = Color.getOppColor(activeColor);
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
 
         totalRepititions.merge(zobristHash, 1, Integer::sum);
+
+        return capturePieceSquare != null ? (capturePieceSquare.idx << 5) | capturedPiece : 0;
     }
 
-    public static void unmakeMove(UnmakeDetails move) {
+    public static void unmakeMove(int move, int prevState, int captureDetails) {
+        Castle castle = Castle.lookup.get((move >> 14) & 15);
+        Square from = Square.lookup.get((move >> 7) & 127);
+        Square to = Square.lookup.get(move & 127);
+        int promote = move >> 18;
+
+        Square prevEnPassant = Square.lookup.get(prevState & 127);
+        int prevCastleRights = (prevState >> 7) & 15;
+        int prevHalfmoves = prevState >> 11;
+
         totalRepititions.merge(zobristHash, -1, Integer::sum);
 
         if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
-        enPassant = move.prevEnPassant;
+        enPassant = prevEnPassant;
         if (enPassant != Square.NULL) zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
 
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
 
-        if (Utils.findIndexOf(move.to, pieceList.get(activeColor)) == -1) {
-            Utils.printMove((move.from.idx << 7) | move.to.idx);
+        if (Utils.findIndexOf(to, pieceList.get(activeColor)) == -1) {
+            Utils.printMove((from.idx << 7) | to.idx);
             printBoard();
             printState();
         }
 
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
-        castleRights = move.prevCastleRights;
+        castleRights = prevCastleRights;
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
 
-        halfmoves = move.prevHalfmoves;
+        halfmoves = prevHalfmoves;
 
         Color oppColor = Color.getOppColor(activeColor);
 
-        if (move.castle != null) {
-            board[move.from.idx] = board[move.castle.square.idx];
-            board[move.castle.square.idx] = 0;
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][move.castle.square.idx];
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][move.from.idx];
+        if (castle != null) {
+            board[from.idx] = board[castle.square.idx];
+            board[castle.square.idx] = 0;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][castle.square.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.KING.id - 1][from.idx];
 
-            board[move.castle.rInitSquare.idx] = board[move.castle.rSquare.idx];
-            board[move.castle.rSquare.idx] = 0;
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][move.castle.rInitSquare.idx];
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][move.castle.rSquare.idx];
+            board[castle.rInitSquare.idx] = board[castle.rSquare.idx];
+            board[castle.rSquare.idx] = 0;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rInitSquare.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rSquare.idx];
 
-            moveInPieceList(activeColor, move.castle.rSquare, move.castle.rInitSquare);
-            pieceList.get(activeColor)[50] = move.from;
+            moveInPieceList(activeColor, castle.rSquare, castle.rInitSquare);
+            pieceList.get(activeColor)[50] = from;
 
             return;
         }
 
-        if (move.isPromote) {
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][(board[move.to.idx] & 7) - 1][move.to.idx];
-            removePiece(activeColor, Piece.extractPieceType(board[move.to.idx]), move.to);
-            board[move.to.idx] = 0;
+        if (promote != 0) {
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][(board[to.idx] & 7) - 1][to.idx];
+            removePiece(activeColor, Piece.extractPieceType(board[to.idx]), to);
+            board[to.idx] = 0;
 
-            board[move.from.idx] = activeColor.id | Piece.PAWN.id;
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][move.from.idx];
-            putPiece(activeColor, Piece.PAWN, move.from);
+            board[from.idx] = activeColor.id | Piece.PAWN.id;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][from.idx];
+            putPiece(activeColor, Piece.PAWN, from);
         } else {
-            board[move.from.idx] = board[move.to.idx];
-            board[move.to.idx] = 0;
-            moveInPieceList(activeColor, move.to, move.from);
+            board[from.idx] = board[to.idx];
+            board[to.idx] = 0;
+            moveInPieceList(activeColor, to, from);
 
-            int pieceId = board[move.from.idx] & 7;
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][move.to.idx];
-            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][move.from.idx];
+            int pieceId = board[from.idx] & 7;
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][to.idx];
+            zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][pieceId - 1][from.idx];
         }
 
-        if (move.capturedPiece != 0) {
-            board[move.capturePieceSquare.idx] = move.capturedPiece;
-            putPiece(oppColor, Piece.extractPieceType(move.capturedPiece),
-                    move.capturePieceSquare);
+        int capturedPiece = captureDetails & 31;
+        if (capturedPiece != 0) {
+            Square capturePieceSquare = Square.lookup.get(captureDetails >> 5);
+            board[capturePieceSquare.idx] = capturedPiece;
+            putPiece(oppColor, Piece.extractPieceType(capturedPiece),
+                    capturePieceSquare);
 
             zobristHash ^=
-                    ZobristKey.PIECES[oppColor.ordinal()][(move.capturedPiece & 7) - 1][move.capturePieceSquare.idx];
+                    ZobristKey.PIECES[oppColor.ordinal()][(capturedPiece & 7) - 1][capturePieceSquare.idx];
         }
-
-        move.reset();
     }
 
     public static boolean isDrawByInsufficientMaterial() {
@@ -755,15 +758,12 @@ final public class GameState {
 
         if (depth == 0) return 1;
         int count = 0;
-        UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getPseudoLegalMoves(activeColor);
+        List<Integer> moves = getValidMoves(activeColor, false, false);
         for (Integer move : moves) {
             int moveCount = 0;
-            makeMove(move, moveDetails);
-            if (inCheck(activeColor)) {
-                unmakeMove(moveDetails);
-                continue;
-            }
+            int prevState = ((halfmoves << 11) | castleRights << 7) | enPassant.idx;
+            int captureDetails = makeMove(move);
+
             moveCount += countNumOfPositions(depth - 1);
             count += moveCount;
             if (print) {
@@ -771,8 +771,7 @@ final public class GameState {
                         Square.lookup.get(move & 127),
                         moveCount, depth);
             }
-            unmakeMove(moveDetails);
-            moveDetails.reset();
+            unmakeMove(move, prevState, captureDetails);
         }
         return count;
     }
@@ -780,17 +779,14 @@ final public class GameState {
     public static int countNumOfPositions(int depth) {
         if (depth == 0) return 1;
         int count = 0;
-        UnmakeDetails moveDetails = new UnmakeDetails();
-        List<Integer> moves = getPseudoLegalMoves(activeColor);
+        List<Integer> moves = getValidMoves(activeColor, false, false);
         for (Integer move : moves) {
-            makeMove(move, moveDetails);
-            if (inCheck(Color.getOppColor(activeColor))) {
-                unmakeMove(moveDetails);
-                continue;
-            }
+            int prevState = ((halfmoves << 11) | castleRights << 7) | enPassant.idx;
+            int captureDetails = makeMove(move);
+
             count += countNumOfPositions(depth - 1);
-            unmakeMove(moveDetails);
-            moveDetails.reset();
+
+            unmakeMove(move, prevState, captureDetails);
         }
         return count;
     }

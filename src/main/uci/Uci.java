@@ -2,7 +2,6 @@ package main.uci;
 
 import main.*;
 import main.moveEval.MoveEval;
-import main.moveGen.UnmakeDetails;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,11 +99,9 @@ public class Uci {
             input = input.substring(input.indexOf("moves") + 6);
             //make each of the moves
             String[] moves = input.split(" ");
-            UnmakeDetails moveDetails = new UnmakeDetails();
             for (String moveNotation : moves) {
                 int move = algebraToMove(moveNotation);
-                GameState.makeMove(move, moveDetails);
-                moveDetails.reset();
+                GameState.makeMove(move);
             }
         }
     }

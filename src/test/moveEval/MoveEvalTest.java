@@ -37,8 +37,7 @@ public class MoveEvalTest {
             Utils.printMove(wBestMove);
 
             MatcherAssert.assertThat(wBestMove, is((Square.E6.idx << 7) | Square.E8.idx));
-            UnmakeDetails moveDetails = new UnmakeDetails();
-            GameState.makeMove((Square.E6.idx << 7) | Square.E8.idx, moveDetails);
+            GameState.makeMove((Square.E6.idx << 7) | Square.E8.idx);
             int bBestMove = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(bBestMove, is((Square.A8.idx << 7) | Square.E8.idx));
         }
@@ -53,46 +52,38 @@ public class MoveEvalTest {
         @Test
         @Ignore
         public void mateIn4() {
-            UnmakeDetails moveDetails = new UnmakeDetails();
             GameState.loadFen("r1bqr2k/ppp3bp/2np2p1/8/2BnPQ2/2N2N2/PPPB1PP1/2KR3R w - - 0 0");
 
             int move1 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move1, is((Square.H1.idx << 7) | Square.H7.idx));
-            GameState.makeMove((Square.H1.idx << 7) | Square.H7.idx, moveDetails);
+            GameState.makeMove((Square.H1.idx << 7) | Square.H7.idx);
 
-            moveDetails.reset();
             int move2 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move2, is((Square.H8.idx << 7) | Square.H7.idx));
-            GameState.makeMove(move2, moveDetails);
+            GameState.makeMove(move2);
 
-            moveDetails.reset();
             int move3 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move3, is((Square.D1.idx << 7) | Square.H1.idx));
-            GameState.makeMove(move3, moveDetails);
+            GameState.makeMove(move3);
 
-            moveDetails.reset();
             int move4 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move4, is((Square.C8.idx << 7) | Square.H3.idx));
-            GameState.makeMove(move4, moveDetails);
-            moveDetails.reset();
-            GameState.makeMove((Square.H1.idx << 7) | Square.H3.idx, moveDetails);
+            GameState.makeMove(move4);
 
-            moveDetails.reset();
+            GameState.makeMove((Square.H1.idx << 7) | Square.H3.idx);
+
             int move5 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move5, is((Square.D8.idx << 7) | Square.H4.idx));
-            GameState.makeMove(move5, moveDetails);
+            GameState.makeMove(move5);
 
-            moveDetails.reset();
             int move6 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move6, is((Square.H3.idx << 7) | Square.H4.idx));
-            GameState.makeMove(move6, moveDetails);
+            GameState.makeMove(move6);
 
-            moveDetails.reset();
             int move7 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move7, is((Square.G7.idx << 7) | Square.H6.idx));
-            GameState.makeMove(move7, moveDetails);
+            GameState.makeMove(move7);
 
-            moveDetails.reset();
             int move8 = MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move8, is((Square.F4.idx << 7) | Square.H6.idx));
         }

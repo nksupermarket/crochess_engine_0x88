@@ -88,11 +88,10 @@ final public class MoveEval {
         int ttMove = TranspositionTable.probeMove(GameState.zobristHash, 1);
         int[] scores = scoreMoves(forcingMoves, ttMove);
 
-        UnmakeDetails moveDetails = new UnmakeDetails();
-
         for (int i = 0; i < scores.length; i++) {
             pickMove(forcingMoves, scores, i);
-            GameState.makeMove(forcingMoves.get(i), moveDetails);
+            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int captureDetails = GameState.makeMove(forcingMoves.get(i));
 
             int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, alpha, beta);
             int eval =
@@ -100,7 +99,8 @@ final public class MoveEval {
 
             if (eval >= beta) {
                 TranspositionTable.store(GameState.zobristHash, 0, TT_Flag.BETA, beta, 0);
-                GameState.unmakeMove(moveDetails);
+                GameState.unmakeMove(forcingMoves.get(i), prevState, captureDetails);
+
                 return beta;
             }
             if (eval > alpha) {
@@ -108,7 +108,7 @@ final public class MoveEval {
                 alpha = eval;
             } else TranspositionTable.store(GameState.zobristHash, 0, TT_Flag.ALPHA, alpha, 0);
 
-            GameState.unmakeMove(moveDetails);
+            GameState.unmakeMove(forcingMoves.get(i), prevState, captureDetails);
         }
 
         return alpha;
@@ -126,11 +126,10 @@ final public class MoveEval {
         int ttMove = TranspositionTable.probeMove(GameState.zobristHash, depth);
         int[] scores = scoreMoves(legalMoves, ttMove);
 
-        UnmakeDetails moveDetails = new UnmakeDetails();
-
         for (int i = 0; i < scores.length; i++) {
             pickMove(legalMoves, scores, i);
-            GameState.makeMove(legalMoves.get(i), moveDetails);
+            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;
             if (!GameState.isDraw()) {
@@ -142,7 +141,7 @@ final public class MoveEval {
 
             if (eval >= beta) {
                 TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.BETA, beta, 0);
-                GameState.unmakeMove(moveDetails);
+                GameState.unmakeMove(legalMoves.get(i), prevState, captureDetails);
                 return beta;
             }
             if (eval > alpha) {
@@ -150,7 +149,7 @@ final public class MoveEval {
                 alpha = eval;
             } else TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.ALPHA, alpha, 0);
 
-            GameState.unmakeMove(moveDetails);
+            GameState.unmakeMove(legalMoves.get(i), prevState, captureDetails);
 
             if (eval == CHECKMATE_VAL - (levelsSearched + 1)) return eval;
         }
@@ -169,11 +168,10 @@ final public class MoveEval {
         int ttMove = TranspositionTable.probeMove(GameState.zobristHash, depth);
         int[] scores = scoreMoves(legalMoves, ttMove);
 
-        UnmakeDetails moveDetails = new UnmakeDetails();
-
         for (int i = 0; i < legalMoves.size(); i++) {
             pickMove(legalMoves, scores, i);
-            GameState.makeMove(legalMoves.get(i), moveDetails);
+            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;
             if (!GameState.isDraw()) {
@@ -187,7 +185,7 @@ final public class MoveEval {
                 TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, eval, bestMove);
             } else TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.ALPHA, alpha, 0);
 
-            GameState.unmakeMove(moveDetails);
+            GameState.unmakeMove(legalMoves.get(i), prevState, captureDetails);
         }
         TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, alpha, bestMove);
         return bestMove;
