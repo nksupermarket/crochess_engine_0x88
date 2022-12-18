@@ -394,7 +394,7 @@ public class GameStateTest {
         }
 
         @Nested
-        @DisplayName("moving rooks adjusts castleRights")
+        @DisplayName("moving/capturing rooks adjusts castleRights")
         class rooks {
             @BeforeEach
             public void init() {
@@ -435,6 +435,15 @@ public class GameStateTest {
 
                     MatcherAssert.assertThat(GameState.castleRights, is(15 ^ Castle.B_q.value));
                 }
+            }
+
+            @Test
+            public void captures() {
+                GameState.loadFen("rnb1k2r/2pp3K/1p2pp2/p4n1p/P7/1PP5/3PP2P/RNBQ1BNR w kq - 0 1");
+                UnmakeDetails moveDetails = new UnmakeDetails();
+                GameState.makeMove((Square.H7.idx << 7) | Square.H8.idx, moveDetails);
+
+                MatcherAssert.assertThat(GameState.castleRights, is(3 ^ Castle.B_k.value));
             }
         }
 

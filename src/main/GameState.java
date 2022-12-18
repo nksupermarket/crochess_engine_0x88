@@ -150,6 +150,7 @@ final public class GameState {
     }
 
     public static void printState() {
+        System.out.println(activeColor);
         System.out.println(pieceCount);
         System.out.println(Arrays.toString(pieceList.get(Color.W)));
         System.out.println(Arrays.toString(pieceList.get(Color.B)));
@@ -339,6 +340,10 @@ final public class GameState {
             Color oppColor = Color.getOppColor(color);
 
             if (castle != null) {
+                if (Utils.findIndexOf(castle.rInitSquare, pieceList.get(color)) == -1) {
+                    Utils.printMove(move);
+                    printBoard();
+                }
                 board[castle.square.idx] = board[from.idx];
                 board[from.idx] = 0;
                 board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
@@ -350,6 +355,7 @@ final public class GameState {
                         board);
                 if (onlyChecks) {
                     pieceList.get(activeColor)[50] = castle.square;
+
                     moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
 
                     check = inCheck(oppColor);
@@ -571,28 +577,28 @@ final public class GameState {
                         from.idx + (activeColor == Color.W ? main.moveGen.Vector.UP.offset : Vector.DOWN.offset));
                 zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
             }
-
-            // checking if rooks moved or have been captured to see if I need to toggle castleRights
-            if ((castleRights & Castle.W_Q.value) != 0 && ((board[Square.A1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) {
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
-                castleRights ^= Castle.W_Q.value;
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
-            }
-            if ((castleRights & Castle.W_K.value) != 0 && ((board[Square.H1.idx] ^ Piece.ROOK.id) ^ Color.W.id) != 0) {
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
-                castleRights ^= Castle.W_K.value;
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
-            }
-            if ((castleRights & Castle.B_q.value) != 0 && ((board[Square.A8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) {
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
-                castleRights ^= Castle.B_q.value;
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
-            }
-            if ((castleRights & Castle.B_k.value) != 0 && ((board[Square.H8.idx] ^ Piece.ROOK.id) ^ Color.B.id) != 0) {
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
-                castleRights ^= Castle.B_k.value;
-                zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
-            }
+        }
+        // checking if rooks moved or have been captured to see if I need to toggle castleRights
+        if ((castleRights & Castle.W_Q.value) != 0 &&
+                (board[Square.A1.idx] ^ (Color.W.id | Piece.ROOK.id)) != 0) {
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+            castleRights ^= Castle.W_Q.value;
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+        }
+        if ((castleRights & Castle.W_K.value) != 0 && (board[Square.H1.idx] ^ (Color.W.id | Piece.ROOK.id)) != 0) {
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+            castleRights ^= Castle.W_K.value;
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
+        }
+        if ((castleRights & Castle.B_q.value) != 0 && (board[Square.A8.idx] ^ (Color.B.id | Piece.ROOK.id)) != 0) {
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+            castleRights ^= Castle.B_q.value;
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+        }
+        if ((castleRights & Castle.B_k.value) != 0 && (board[Square.H8.idx] ^ (Color.B.id | Piece.ROOK.id)) != 0) {
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
+            castleRights ^= Castle.B_k.value;
+            zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
         }
 
         if (moveDetails.capturedPiece == 0 && pieceType != Piece.PAWN) halfmoves++;
@@ -613,6 +619,12 @@ final public class GameState {
 
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
+
+        if (Utils.findIndexOf(move.to, pieceList.get(activeColor)) == -1) {
+            Utils.printMove((move.from.idx << 7) | move.to.idx);
+            printBoard();
+            printState();
+        }
 
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.W.ordinal()][castleRights >> 2];
         zobristHash ^= ZobristKey.CASTLING_RIGHTS[Color.B.ordinal()][castleRights & 3];
@@ -736,8 +748,7 @@ final public class GameState {
     }
 
     public static boolean isDraw() {
-        return false;
-//        return isDrawByMoveRule() || isDrawByRepitition(GameState.zobristHash) || isDrawByInsufficientMaterial();
+        return isDrawByMoveRule() || isDrawByRepitition(GameState.zobristHash) || isDrawByInsufficientMaterial();
     }
 
     public static int countNumOfPositions(int depth, boolean print) {
