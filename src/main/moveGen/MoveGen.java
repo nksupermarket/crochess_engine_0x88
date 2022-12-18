@@ -80,14 +80,22 @@ final public class MoveGen {
         }
     }
 
-    private static void addSlidingPieceMoves(List<Integer> moveList, Vector[] vectors) {
-
+    private static void addSlidingPieceMoves(Square start, Color color, List<Integer> moveList, Vector[] vectors) {
+        for (Vector vector : vectors) {
+            int squareIdx = start.idx + vector.offset;
+            while (Square.isValid(squareIdx)) {
+                Square square = Square.lookup.get(squareIdx);
+                if ((GameState.board[square.idx] & color.id) == 0) moveList.add((start.idx << 7) | square.idx);
+                if (GameState.board[square.idx] != 0) break;
+                squareIdx = squareIdx + vector.offset;
+            }
+        }
     }
 
-    public static List<Integer> pseudoLegal(int[] board,
-                                            Square start,
-                                            Piece pieceType,
-                                            Color color) {
+    public static List<Integer> pseudoLegal(
+            Square start,
+            Piece pieceType,
+            Color color) {
         /*
         21 bit int to represent move
         first 7 bits refer to the "to" square idx
@@ -97,29 +105,15 @@ final public class MoveGen {
          */
         List<Integer> moves = new ArrayList<>();
 
-        Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if ((board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
-            // return false after capture move has been added
-            return board[square.idx] == 0;
-        };
-
         switch (pieceType) {
             case QUEEN -> {
-                for (Vector vector : Vector.values()) {
-                    traverseVectorLong(vector,
-                            start,
-                            pushToMoves);
-                }
+                addSlidingPieceMoves(start, color, moves, Vector.values());
                 return moves;
             }
 
             case ROOK -> {
                 final Vector[] XY_VECTORS = {Vector.UP, Vector.DOWN, Vector.LEFT, Vector.RIGHT};
-                for (Vector vector : XY_VECTORS) {
-                    traverseVectorLong(vector,
-                            start,
-                            pushToMoves);
-                }
+                addSlidingPieceMoves(start, color, moves, XY_VECTORS);
                 return moves;
             }
 
@@ -128,11 +122,7 @@ final public class MoveGen {
                         Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT,
                         Vector.DOWN_RIGHT
                 };
-                for (Vector vector : DIAGONAL_VECTORS) {
-                    traverseVectorLong(vector,
-                            start,
-                            pushToMoves);
-                }
+                addSlidingPieceMoves(start, color, moves, DIAGONAL_VECTORS);
                 return moves;
             }
 
@@ -140,8 +130,8 @@ final public class MoveGen {
                 final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
                 for (int jump : KNIGHT_JUMPS) {
                     int jumpIdx = start.idx + jump;
-                    if (Square.isValid(jumpIdx) && (board[jumpIdx] & color.id) == 0)
-                        pushToMoves.apply(Square.lookup.get(jumpIdx));
+                    if (Square.isValid(jumpIdx) && (GameState.board[jumpIdx] & color.id) == 0)
+                        moves.add((start.idx << 7) | jumpIdx);
                 }
                 return moves;
             }
@@ -245,15 +235,14 @@ final public class MoveGen {
         return false;
     }
 
-    public static List<Integer> pseudoLegalForKing(int[] board,
-                                                   Square start,
-                                                   Color color,
-                                                   int castleRights,
-                                                   Square[] oppPieceMap) {
+    public static List<Integer> pseudoLegalForKing(
+            Square start,
+            Color color,
+            Square[] oppPieceMap) {
         // refer to pseudoLegal for breakdown of move representation
         List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMoves = (Square square) -> {
-            if ((board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
+            if ((GameState.board[square.idx] & color.id) == 0) moves.add((start.idx << 7) | square.idx);
             return false;
         };
         for (Vector vector : Vector.values()) {
@@ -264,38 +253,41 @@ final public class MoveGen {
 
         // kingside castle check
         Color oppColor = color == Color.W ? Color.B : Color.W;
-        if (color == Color.W && (castleRights & 8) != 0 || color == Color.B && (castleRights & 2) != 0) {
+        if (color == Color.W && (GameState.castleRights & 8) != 0 ||
+                color == Color.B && (GameState.castleRights & 2) != 0) {
             final Castle castle = color == Color.W ? Castle.W_K : Castle.B_k;
-            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 && !isAttacked(castle.rSquare,
-                    oppColor,
-                    oppPieceMap,
-                    board) && !isAttacked(start, oppColor, oppPieceMap, board)) {
+            if (GameState.board[castle.square.idx] == 0 && GameState.board[castle.rSquare.idx] == 0 &&
+                    !isAttacked(castle.rSquare,
+                            oppColor,
+                            oppPieceMap,
+                            GameState.board) && !isAttacked(start, oppColor, oppPieceMap, GameState.board)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
         //queenside castle check
-        if (color == Color.W && (castleRights & 4) != 0 || color == Color.B && (castleRights & 1) != 0) {
+        if (color == Color.W && (GameState.castleRights & 4) != 0 ||
+                color == Color.B && (GameState.castleRights & 1) != 0) {
             final Castle castle = color == Color.W ? Castle.W_Q : Castle.B_q;
 
-            if (board[castle.square.idx] == 0 && board[castle.rSquare.idx] == 0 &&
-                    board[castle.rInitSquare.idx + 1] == 0 && !isAttacked(castle.rSquare,
+            if (GameState.board[castle.square.idx] == 0 && GameState.board[castle.rSquare.idx] == 0 &&
+                    GameState.board[castle.rInitSquare.idx + 1] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
                     oppPieceMap,
-                    board) && !isAttacked(start, oppColor, oppPieceMap, board)) {
+                    GameState.board) && !isAttacked(start, oppColor, oppPieceMap, GameState.board)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }
         return moves;
     }
 
-    public static List<Integer> pseudoLegalForPawn(int[] board,
-                                                   Square start,
-                                                   Color color,
-                                                   Square enPassant) {
+    public static List<Integer> pseudoLegalForPawn(
+            Square start,
+            Color color,
+            Square enPassant) {
         // refer to pseudoLegal for breakdown of move representation
         List<Integer> moves = new ArrayList<>();
         Function<Square, Boolean> pushToMovesRegular = (Square square) -> {
-            if (board[square.idx] != 0) return false;
+            if (GameState.board[square.idx] != 0) return false;
 
             if (!Square.isPromotion(square,
                     color)) moves.add((start.idx << 7) | square.idx);
@@ -324,8 +316,8 @@ final public class MoveGen {
                         Vector.DOWN_LEFT
                 };
         Function<Square, Boolean> pushToMovesCapture = (Square square) -> {
-            if (square != enPassant && board[square.idx] == 0) return false;
-            if ((board[square.idx] & color.id) != 0) return false;
+            if (square != enPassant && GameState.board[square.idx] == 0) return false;
+            if ((GameState.board[square.idx] & color.id) != 0) return false;
             if (!Square.isPromotion(square,
                     color)) moves.add((start.idx << 7) | square.idx);
             else {

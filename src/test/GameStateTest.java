@@ -185,8 +185,7 @@ public class GameStateTest {
         public void cantCastleIntoCheck() {
             GameState.loadFen("rnbqkbn1/pppppppp/6r1/8/8/5N2/PPPPPP1P/RNBQK2R w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.board,
-                    GameState.pieceList.get(Color.W)[50], Color.W, GameState.castleRights,
+            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList.get(Color.W)[50], Color.W,
                     GameState.pieceList.get(Color.B));
             GameState.filterOutValidMoves(validMoves, false, false);
 
@@ -201,8 +200,7 @@ public class GameStateTest {
         public void cantMovePinnedPieceAwayFromPin() {
             GameState.loadFen("rnb1kbnr/ppp1pppp/4q3/3p4/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForPawn(GameState.board,
-                    Square.E4, Color.W, GameState.enPassant);
+            List<Integer> validMoves = MoveGen.pseudoLegalForPawn(Square.E4, Color.W, GameState.enPassant);
             GameState.filterOutValidMoves(validMoves, false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.B.id | Piece.PAWN.id));
@@ -216,8 +214,7 @@ public class GameStateTest {
         public void cantMoveKingIntoCheck() {
             GameState.loadFen("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.board,
-                    GameState.pieceList.get(Color.W)[50], Color.W, GameState.castleRights,
+            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList.get(Color.W)[50], Color.W,
                     GameState.pieceList.get(Color.B));
             GameState.filterOutValidMoves(validMoves, false, false);
 

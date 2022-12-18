@@ -20,7 +20,7 @@ public class MoveGenTest {
         public void queenPseudoLegalMovesWorkWithNoObstacles() {
             GameState.loadFen("8/8/8/8/4Q3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegal(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegal(
                     Square.E4,
                     Piece.QUEEN,
                     Color.W);
@@ -54,7 +54,7 @@ public class MoveGenTest {
         public void rookPseudoLegalMovesWorkWithNoObstacles() {
             GameState.loadFen("8/8/8/8/4R3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegal(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegal(
                     Square.E4,
                     Piece.ROOK,
                     Color.W);
@@ -79,7 +79,7 @@ public class MoveGenTest {
         public void bishopPseudoLegalMovesWorkWithNoObstacles() {
             GameState.loadFen("8/8/8/8/4B3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegal(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegal(
                     Square.E4,
                     Piece.BISHOP,
                     Color.W);
@@ -103,7 +103,7 @@ public class MoveGenTest {
         public void pseudoLegalMovesWorksWithCaptures() {
             GameState.loadFen("8/8/8/3rrr2/3rQr2/3rrr2/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegal(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegal(
                     Square.E4,
                     Piece.QUEEN,
                     Color.W);
@@ -125,7 +125,7 @@ public class MoveGenTest {
         public void pseudoLegalMovesWorksWithOwnPiecesBlocking() {
             GameState.loadFen("8/8/8/3RRR2/3RQR2/3RRR2/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegal(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegal(
                     Square.E4,
                     Piece.QUEEN,
                     Color.W);
@@ -142,7 +142,7 @@ public class MoveGenTest {
         public void pawnPseudoLegalMovesWorksForRegularMoves() {
             GameState.loadFen("8/8/8/8/4p3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForPawn(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
                     Color.W,
                     null
@@ -162,7 +162,7 @@ public class MoveGenTest {
         public void pawnPseudoLegalMovesWorksForWhiteCaptures() {
             GameState.loadFen("8/8/8/3r1r2/4p3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForPawn(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
                     Color.W,
                     null
@@ -182,7 +182,7 @@ public class MoveGenTest {
         public void pawnPseudoLegalMovesWorksForBlackCaptures() {
             GameState.loadFen("8/8/8/4p3/3R1R2/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForPawn(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E5,
                     Color.B,
                     null
@@ -202,7 +202,7 @@ public class MoveGenTest {
         public void pawnPseudoLegalMovesWorksForPiecesBlocking() {
             GameState.loadFen("8/8/8/4p3/3RrR2/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForPawn(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E5,
                     Color.B,
                     null
@@ -222,7 +222,7 @@ public class MoveGenTest {
         public void pawnPseudoLegalMovesWorksForEnPassant() {
             GameState.loadFen("8/8/8/8/4p3/8/8/8 w KQkq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForPawn(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForPawn(
                     Square.E4,
                     Color.B,
                     Square.D3
@@ -244,12 +244,11 @@ public class MoveGenTest {
     class pseudoLegalMovesForKing {
         @Test
         public void kingPseudoMovesWorks() {
-            GameState.loadFen("8/8/8/8/4K3/8/8/8 w KQkq - 0 1");
+            GameState.loadFen("8/8/8/8/4K3/8/8/8 w - - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E4,
                     Color.W,
-                    0,
                     GameState.pieceList.get(Color.B)
             );
 
@@ -268,12 +267,11 @@ public class MoveGenTest {
 
         @Test
         public void kingPseudoMovesWorksWithPiecesBlocking() {
-            GameState.loadFen("8/8/8/3RRR2/3RKR2/3RRR2/8/8 w KQkq - 0 1");
+            GameState.loadFen("8/8/8/3RRR2/3RKR2/3RRR2/8/8 w - - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E4,
                     Color.W,
-                    0,
                     GameState.pieceList.get(Color.B)
             );
 
@@ -283,12 +281,11 @@ public class MoveGenTest {
 
         @Test
         public void kingPseudoMovesIncludesWhiteCastleMoves() {
-            GameState.loadFen("8/8/8/8/8/8/8/4K3 w KQkq - 0 1");
+            GameState.loadFen("8/8/8/8/8/8/8/4K3 w KQ - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E1,
                     Color.W,
-                    12,
                     GameState.pieceList.get(Color.B)
             );
 
@@ -300,9 +297,11 @@ public class MoveGenTest {
             List<Integer> allExpectedMoves = allExpectedList.stream()
                                                             .map((v) -> {
                                                                 if (v == Square.C1)
-                                                                    return ((Castle.W_Q.value << 14) | Square.E1.idx);
+                                                                    return (((Castle.W_Q.value << 14) |
+                                                                            Square.E1.idx << 7) | Square.C1.idx);
                                                                 if (v == Square.G1)
-                                                                    return ((Castle.W_K.value << 14) | Square.E1.idx);
+                                                                    return (((Castle.W_K.value << 14) |
+                                                                            Square.E1.idx << 7) | Square.G1.idx);
 
                                                                 return (Square.E1.idx << 7) | v.idx;
                                                             })
@@ -314,80 +313,17 @@ public class MoveGenTest {
 
         @Test
         public void kingPseudoMovesIncludesBlackCastleMoves() {
-            GameState.loadFen("8/8/8/8/8/8/8/4K3 w KQkq - 0 1");
+            GameState.loadFen("8/8/8/8/8/8/8/4K3 w kq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E8,
                     Color.B,
-                    3,
                     GameState.pieceList.get(Color.W)
             );
 
             Square[] allExpected = {
                     Square.D7, Square.E7, Square.F7, Square.D8,
                     Square.F8, Square.G8, Square.C8,
-                    };
-            List<Square> allExpectedList = Arrays.asList(allExpected);
-            List<Integer> allExpectedMoves = allExpectedList.stream()
-                                                            .map((v) -> {
-                                                                if (v == Square.C8)
-                                                                    return ((Castle.B_q.value << 14) | Square.E8.idx);
-                                                                if (v == Square.G8)
-                                                                    return ((Castle.B_k.value << 14) | Square.E8.idx);
-
-                                                                return (Square.E8.idx << 7) | v.idx;
-                                                            })
-                                                            .toList();
-
-            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
-                    is(true));
-        }
-
-        @Test
-        public void kingPseudoMovesWorksWithKingsideOnly() {
-            GameState.loadFen("8/8/8/8/8/8/8/4K3 w KQkq - 0 1");
-
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
-                    Square.E1,
-                    Color.W,
-                    8,
-                    GameState.pieceList.get(Color.B)
-            );
-
-            Square[] allExpected = {
-                    Square.D2, Square.E2, Square.F2, Square.D1,
-                    Square.F1, Square.G1,
-                    };
-            List<Square> allExpectedList = Arrays.asList(allExpected);
-            List<Integer> allExpectedMoves = allExpectedList.stream()
-                                                            .map((v) -> {
-                                                                if (v == Square.C1)
-                                                                    return ((Castle.W_Q.value << 14) | Square.E1.idx);
-                                                                if (v == Square.G1)
-                                                                    return ((Castle.W_K.value << 14) | Square.E1.idx);
-
-                                                                return (Square.E1.idx << 7) | v.idx;
-                                                            })
-                                                            .toList();
-
-            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
-                    is(true));
-        }
-
-        @Test
-        public void kingPseudoMovesWorksWithQueensideOnly() {
-            GameState.loadFen("8/8/8/8/8/8/8/4K3 w KQkq - 0 1");
-
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
-                    Square.E8,
-                    Color.B,
-                    1,
-                    GameState.pieceList.get(Color.W)
-            );
-
-            Square[] allExpected = {
-                    Square.D7, Square.E7, Square.F7, Square.D8,
-                    Square.F8, Square.C8,
                     };
             List<Square> allExpectedList = Arrays.asList(allExpected);
             List<Integer> allExpectedMoves = allExpectedList.stream()
@@ -410,13 +346,77 @@ public class MoveGenTest {
         }
 
         @Test
-        public void doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnQueenside() {
-            GameState.loadFen("8/8/8/8/8/3r4/8/4K3 w KQkq - 0 1");
+        public void kingPseudoMovesWorksWithKingsideOnly() {
+            GameState.loadFen("8/8/8/8/8/8/8/4K3 w K - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E1,
                     Color.W,
-                    12,
+                    GameState.pieceList.get(Color.B)
+            );
+
+            Square[] allExpected = {
+                    Square.D2, Square.E2, Square.F2, Square.D1,
+                    Square.F1, Square.G1,
+                    };
+            List<Square> allExpectedList = Arrays.asList(allExpected);
+            List<Integer> allExpectedMoves = allExpectedList.stream()
+                                                            .map((v) -> {
+                                                                if (v == Square.C1)
+                                                                    return (((Castle.W_Q.value << 14) |
+                                                                            Square.E1.idx << 7) | Square.C1.idx);
+                                                                if (v == Square.G1)
+                                                                    return (((Castle.W_K.value << 14) |
+                                                                            Square.E1.idx << 7) | Square.G1.idx);
+
+                                                                return (Square.E1.idx << 7) | v.idx;
+                                                            })
+                                                            .toList();
+
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+        }
+
+        @Test
+        public void kingPseudoMovesWorksWithQueensideOnly() {
+            GameState.loadFen("8/8/8/8/8/8/8/4K3 w q - 0 1");
+
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
+                    Square.E8,
+                    Color.B,
+                    GameState.pieceList.get(Color.W)
+            );
+
+            Square[] allExpected = {
+                    Square.D7, Square.E7, Square.F7, Square.D8,
+                    Square.F8, Square.C8,
+                    };
+            List<Square> allExpectedList = Arrays.asList(allExpected);
+            List<Integer> allExpectedMoves = allExpectedList.stream()
+                                                            .map((v) -> {
+                                                                if (v == Square.C8)
+                                                                    return ((Castle.B_q.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_q.square.idx);
+                                                                if (v == Square.G8)
+                                                                    return ((Castle.B_k.value << 14) |
+                                                                            Square.E8.idx << 7 |
+                                                                            Castle.B_k.square.idx);
+
+                                                                return (Square.E8.idx << 7) | v.idx;
+                                                            })
+                                                            .toList();
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+        }
+
+        @Test
+        public void doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnQueenside() {
+            GameState.loadFen("8/8/8/8/8/3r4/8/4K3 w KQ - 0 1");
+
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
+                    Square.E1,
+                    Color.W,
                     GameState.pieceList.get(Color.B)
             );
 
@@ -446,12 +446,11 @@ public class MoveGenTest {
 
         @Test
         public void doesntIncludeCastleMoveIfSquareInBetweenIsAttackedOnKingside() {
-            GameState.loadFen("4k3/8/8/8/8/5R2/8/4K3 w KQkq - 0 1");
+            GameState.loadFen("4k3/8/8/8/8/5R2/8/4K3 w kq - 0 1");
 
-            List<Integer> moves = MoveGen.pseudoLegalForKing(GameState.board,
+            List<Integer> moves = MoveGen.pseudoLegalForKing(
                     Square.E8,
                     Color.B,
-                    3,
                     GameState.pieceList.get(Color.W)
             );
 
