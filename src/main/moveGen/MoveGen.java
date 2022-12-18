@@ -87,7 +87,7 @@ final public class MoveGen {
                 Square square = Square.lookup.get(squareIdx);
                 if ((GameState.board[square.idx] & color.id) == 0) moveList.add((start.idx << 7) | square.idx);
                 if (GameState.board[square.idx] != 0) break;
-                squareIdx = squareIdx + vector.offset;
+                squareIdx += vector.offset;
             }
         }
     }
@@ -142,11 +142,21 @@ final public class MoveGen {
         }
     }
 
+    private static boolean isNoObstacles(Vector vector, Square start, int attackingPiece) {
+        int squareIdx = start.idx + vector.offset;
+        while (Square.isValid(squareIdx)) {
+            if (GameState.board[squareIdx] != 0) {
+                return GameState.board[squareIdx] == attackingPiece;
+            }
+            squareIdx += vector.offset;
+        }
+        return false;
+    }
+
     public static boolean isAttacked(Square square,
                                      Color oppColor,
                                      Square[] oppPieceList
     ) {
-        final boolean[] attacked = {false};
         for (Piece piece : Piece.values()) {
             if (piece == Piece.NULL) continue;
             // iterating to 10 because each piece type gets 10 slots in the array except the king
@@ -161,14 +171,10 @@ final public class MoveGen {
                 int delta = square.idx - oppPieceList[idx].idx + Square.H8.idx;
                 // need to add 119 so there are no negative indices
 
-                Function<Square, Boolean> lookForObstacles = (Square newSquare) -> {
-                    if (GameState.board[newSquare.idx] == 0) return true;
-                    if (GameState.board[newSquare.idx] == (oppColor.id | piece.id)) {
-                        attacked[0] = true;
-                    }
-                    return false;
-                };
-
+                if (delta == 239) {
+                    GameState.printState();
+                    GameState.printBoard();
+                }
                 switch (ATTACK_TABLE[delta]) {
                    /*   ATTACK_NONE : 0;
                         ATTACK_KQR : 1;
@@ -181,19 +187,16 @@ final public class MoveGen {
                     case 1 -> {
                         if (piece == Piece.KING) return true;
                         if (piece != Piece.ROOK && piece != Piece.QUEEN) continue;
-                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
-                                square,
-                                lookForObstacles);
-                        if (attacked[0]) return true;
+
+                        if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
+                                oppColor.id | piece.id)) return true;
                     }
 
                     case 2 -> {
                         if (piece != Piece.ROOK && piece != Piece.QUEEN) continue;
 
-                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
-                                square,
-                                lookForObstacles);
-                        if (attacked[0]) return true;
+                        if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
+                                oppColor.id | piece.id)) return true;
                     }
 
                     case 3 -> {
@@ -201,10 +204,8 @@ final public class MoveGen {
                         if (piece == Piece.PAWN && oppColor == Color.B) return true;
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
-                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
-                                square,
-                                lookForObstacles);
-                        if (attacked[0]) return true;
+                        if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
+                                oppColor.id | piece.id)) return true;
                     }
 
                     case 4 -> {
@@ -212,19 +213,15 @@ final public class MoveGen {
                         if (piece == Piece.PAWN && oppColor == Color.W) return true;
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
 
-                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
-                                square,
-                                lookForObstacles);
-                        if (attacked[0]) return true;
+                        if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
+                                oppColor.id | piece.id)) return true;
                     }
 
                     case 5 -> {
                         if (piece != Piece.BISHOP && piece != Piece.QUEEN) continue;
-
-                        traverseVectorLong(Vector.of(DELTA_ARRAY[delta]),
-                                square,
-                                lookForObstacles);
-                        if (attacked[0]) return true;
+                        
+                        if (isNoObstacles(Vector.of(DELTA_ARRAY[delta]), square,
+                                oppColor.id | piece.id)) return true;
                     }
 
                     case 6 -> {
@@ -272,7 +269,8 @@ final public class MoveGen {
             if (GameState.board[castle.square.idx] == 0 && GameState.board[castle.rSquare.idx] == 0 &&
                     GameState.board[castle.rInitSquare.idx + 1] == 0 && !isAttacked(castle.rSquare,
                     oppColor,
-                    oppPieceMap) && !isAttacked(start, oppColor, oppPieceMap)) {
+                    oppPieceMap
+            ) && !isAttacked(start, oppColor, oppPieceMap)) {
                 moves.add(((castle.value << 14) | start.idx << 7) | castle.square.idx);
             }
         }

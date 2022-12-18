@@ -569,30 +569,6 @@ public class GameStateTest {
             }
 
             @Test
-            public void worksForBlackMoves() {
-                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
-                GameState.makeMove((Square.E7.idx << 7) | Square.E6.idx);
-
-                long hash = GameState.zobristHash;
-
-                GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3P4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-
-                MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-            }
-
-            @Test
-            public void differentHashKeysForDifferentActiveColor() {
-                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
-                GameState.makeMove((Square.E7.idx << 7) | Square.E6.idx);
-
-                long hash = GameState.zobristHash;
-
-                GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
-
-                MatcherAssert.assertThat(hash, not(GameState.zobristHash));
-            }
-
-            @Test
             public void worksForEnPassant() {
                 GameState.loadFen("1r2k2r/1ppq1ppp/2npbn2/p1b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQkq a6 0 1");
                 GameState.makeMove((Square.A2.idx << 7) | Square.A4.idx);
@@ -628,17 +604,6 @@ public class GameStateTest {
                     MatcherAssert.assertThat(hash, is(GameState.zobristHash));
                 }
 
-                @Test
-                public void blackside() {
-                    GameState.activeColor = Color.B;
-                    GameState.zobristHash ^= ZobristKey.SIDE;
-                    GameState.makeMove((Square.E8.idx << 7) | Square.F8.idx);
-                    long hash = GameState.zobristHash;
-
-                    GameState.loadFen("r4k1r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQ - 0 1");
-                    MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-                }
-
                 @Nested
                 class whenRooksAreMoved {
                     @Nested
@@ -651,17 +616,6 @@ public class GameStateTest {
                             GameState.loadFen("r3k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K1R1 b Qkq - 0 1");
                             MatcherAssert.assertThat(hash, is(GameState.zobristHash));
                         }
-
-                        @Test
-                        public void blackside() {
-                            GameState.activeColor = Color.B;
-                            GameState.zobristHash ^= ZobristKey.SIDE;
-                            GameState.makeMove((Square.H8.idx << 7) | Square.F8.idx);
-                            long hash = GameState.zobristHash;
-
-                            GameState.loadFen("r3kr2/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQq - 0 1");
-                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-                        }
                     }
 
                     @Nested
@@ -672,17 +626,6 @@ public class GameStateTest {
                             long hash = GameState.zobristHash;
 
                             GameState.loadFen("r3k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/1R2K2R b Kkq - 0 1");
-                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-                        }
-
-                        @Test
-                        public void blackside() {
-                            GameState.activeColor = Color.B;
-                            GameState.zobristHash ^= ZobristKey.SIDE;
-                            GameState.makeMove((Square.A8.idx << 7) | Square.B8.idx);
-                            long hash = GameState.zobristHash;
-
-                            GameState.loadFen("1r2k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQk - 0 1");
                             MatcherAssert.assertThat(hash, is(GameState.zobristHash));
                         }
                     }
@@ -706,18 +649,6 @@ public class GameStateTest {
                         long hash = GameState.zobristHash;
 
                         GameState.loadFen("r3k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R4RK1 b kq - 0 1");
-                        MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-                    }
-
-                    @Test
-                    void blackside() {
-                        GameState.activeColor = Color.B;
-                        GameState.zobristHash ^= ZobristKey.SIDE;
-                        Castle castle = Castle.B_k;
-                        GameState.makeMove((castle.value << 14) | Square.E8.idx << 7);
-                        long hash = GameState.zobristHash;
-
-                        GameState.loadFen("r4rk1/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQ - 0 1");
                         MatcherAssert.assertThat(hash, is(GameState.zobristHash));
                     }
                 }

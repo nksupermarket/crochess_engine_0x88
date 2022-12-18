@@ -473,8 +473,7 @@ public class MoveGenTest {
                                                                 return (Square.E8.idx << 7) | v.idx;
                                                             })
                                                             .toList();
-            System.out.println(moves);
-            System.out.println(allExpectedMoves);
+            
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
