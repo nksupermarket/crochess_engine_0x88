@@ -1,6 +1,6 @@
 package main.utils;
 
-import main.Square;
+import main.types.Square;
 
 final public class Utils {
     private Utils() {

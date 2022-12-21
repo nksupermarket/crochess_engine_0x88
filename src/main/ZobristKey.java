@@ -1,9 +1,8 @@
 package main;
 
-import main.Color;
-import main.GameState;
-import main.Piece;
-import main.Square;
+import main.types.Color;
+import main.types.Piece;
+import main.types.Square;
 
 import java.util.Random;
 

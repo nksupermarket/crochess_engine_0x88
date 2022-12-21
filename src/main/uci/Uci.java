@@ -2,6 +2,10 @@ package main.uci;
 
 import main.*;
 import main.moveEval.MoveEval;
+import main.types.Castle;
+import main.types.Color;
+import main.types.Piece;
+import main.types.Square;
 
 import java.util.HashMap;
 import java.util.Map;

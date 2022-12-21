@@ -1,16 +1,14 @@
 package main.moveEval;
 
-import main.Color;
+import main.types.Color;
 import main.GameState;
-import main.Piece;
-import main.Square;
-import main.moveGen.*;
-import main.utils.Utils;
+import main.types.Piece;
+import main.types.TT_Flag;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import main.utils.Utils;
 
 final public class MoveEval {
     private MoveEval() {
@@ -69,8 +67,12 @@ final public class MoveEval {
         if (GameState.isDraw()) return 0;
         if (GameState.isCheckmate(GameState.activeColor)) return -CHECKMATE_VAL + levelsSearched;
         if (GameState.isCheckmate(Color.getOppColor(GameState.activeColor))) return CHECKMATE_VAL - levelsSearched;
-        return GameState.pieceCount.get(GameState.activeColor) -
+
+        int pieceCountDiff = GameState.pieceCount.get(GameState.activeColor) -
                 GameState.pieceCount.get(Color.getOppColor(GameState.activeColor));
+        int pieceBonusDiff = GameState.pieceBonus.get(GameState.activeColor) -
+                GameState.pieceBonus.get(Color.getOppColor(GameState.activeColor));
+        return pieceCountDiff + pieceBonusDiff;
     }
 
     private static int quiescence(int alpha, int beta, int levelsSearched) {
@@ -90,7 +92,7 @@ final public class MoveEval {
 
         for (int i = 0; i < scores.length; i++) {
             pickMove(forcingMoves, scores, i);
-            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int prevState = GameState.encodePrevState();
             int captureDetails = GameState.makeMove(forcingMoves.get(i));
 
             int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, alpha, beta);
@@ -109,6 +111,8 @@ final public class MoveEval {
             } else TranspositionTable.store(GameState.zobristHash, 0, TT_Flag.ALPHA, alpha, 0);
 
             GameState.unmakeMove(forcingMoves.get(i), prevState, captureDetails);
+
+            if (eval == CHECKMATE_VAL - (levelsSearched + 1)) return eval;
         }
 
         return alpha;
@@ -128,7 +132,7 @@ final public class MoveEval {
 
         for (int i = 0; i < scores.length; i++) {
             pickMove(legalMoves, scores, i);
-            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int prevState = GameState.encodePrevState();
             int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;
@@ -170,7 +174,7 @@ final public class MoveEval {
 
         for (int i = 0; i < legalMoves.size(); i++) {
             pickMove(legalMoves, scores, i);
-            int prevState = ((GameState.halfmoves << 11) | GameState.castleRights << 7) | GameState.enPassant.idx;
+            int prevState = GameState.encodePrevState();
             int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;
@@ -186,6 +190,8 @@ final public class MoveEval {
             } else TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.ALPHA, alpha, 0);
 
             GameState.unmakeMove(legalMoves.get(i), prevState, captureDetails);
+
+            if (eval == CHECKMATE_VAL - 1) return bestMove;
         }
         TranspositionTable.store(GameState.zobristHash, depth, TT_Flag.EXACT, alpha, bestMove);
         return bestMove;

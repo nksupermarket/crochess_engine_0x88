@@ -2,6 +2,10 @@ package test.moveGen;
 
 import main.*;
 import main.moveGen.*;
+import main.types.Castle;
+import main.types.Color;
+import main.types.Piece;
+import main.types.Square;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 

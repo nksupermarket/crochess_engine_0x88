@@ -1,9 +1,9 @@
 
 package test;
 
-import main.Color;
+import main.types.Color;
 import main.GameState;
-import main.Piece;
+import main.types.Piece;
 import main.ZobristKey;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;

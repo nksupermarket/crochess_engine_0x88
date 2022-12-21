@@ -1,11 +1,13 @@
 package main.moveGen;
 
 import main.*;
+import main.types.Castle;
+import main.types.Color;
+import main.types.Piece;
+import main.types.Square;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 final public class MoveGen {
     private MoveGen() {

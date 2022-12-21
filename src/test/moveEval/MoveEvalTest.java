@@ -2,6 +2,7 @@ package test.moveEval;
 
 import main.*;
 import main.moveEval.MoveEval;
+import main.types.Square;
 import main.uci.Uci;
 import main.utils.Utils;
 import org.hamcrest.MatcherAssert;

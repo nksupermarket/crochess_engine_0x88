@@ -1,10 +1,10 @@
 package test;
 
-import main.Castle;
+import main.types.Castle;
 import main.GameState;
-import main.Piece;
-import main.Color;
-import main.Square;
+import main.types.Piece;
+import main.types.Color;
+import main.types.Square;
 import main.uci.Uci;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;

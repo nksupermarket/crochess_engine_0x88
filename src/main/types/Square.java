@@ -1,4 +1,4 @@
-package main;
+package main.types;
 
 import java.util.*;
 
@@ -31,12 +31,20 @@ public enum Square {
         return (idx & 0x88) == 0;
     }
 
-    private static int getRank(Square square) {
+    public static int getRank(Square square) {
         return square.idx >> 4;
     }
 
-    private static int getFile(Square square) {
+    public static int getFile(Square square) {
         return square.idx & 7;
+    }
+
+    public static int edgeDistance(int file) {
+        return Math.min(file, 7 - file);
+    }
+
+    public static int flipRank(int rank) {
+        return 7 - rank;
     }
 
     public static Color getColor(Square square) {

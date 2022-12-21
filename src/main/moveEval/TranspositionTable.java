@@ -1,5 +1,7 @@
 package main.moveEval;
 
+import main.types.TT_Flag;
+
 import java.util.Map;
 import java.util.HashMap;
 

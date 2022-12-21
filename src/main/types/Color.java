@@ -1,4 +1,4 @@
-package main;
+package main.types;
 
 public enum Color {
     W(8), B(16);
