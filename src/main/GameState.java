@@ -466,7 +466,7 @@ final public class GameState {
     }
 
     private static void checkPhase() {
-        if (pieceCount.get(Color.W) + pieceCount.get(Color.B) <= Phase.EG.limit) {
+        if (phase == Phase.MG && pieceCount.get(Color.W) + pieceCount.get(Color.B) <= Phase.EG.limit) {
             phase = Phase.EG;
             recalibrateCount();
         }
