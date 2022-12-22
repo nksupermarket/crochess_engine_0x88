@@ -69,12 +69,12 @@ final public class MoveEval {
         if (GameState.isCheckmate(Color.getOppColor(GameState.activeColor))) return CHECKMATE_VAL - levelsSearched;
 
         Color oppColor = Color.getOppColor(GameState.activeColor);
-        int pawnCountDiff = GameState.pawnCount.get(GameState.activeColor) -
-                GameState.pawnCount.get(oppColor);
-        int pieceCountDiff = GameState.pieceCount.get(GameState.activeColor) -
-                GameState.pieceCount.get(oppColor);
-        int pieceBonusDiff = GameState.pieceBonus.get(GameState.activeColor) -
-                GameState.pieceBonus.get(oppColor);
+        int pawnCountDiff = GameState.pawnCount[GameState.activeColor.ordinal()] -
+                GameState.pawnCount[oppColor.ordinal()];
+        int pieceCountDiff = GameState.pieceCount[GameState.activeColor.ordinal()] -
+                GameState.pieceCount[oppColor.ordinal()];
+        int pieceBonusDiff = GameState.pieceBonus[GameState.activeColor.ordinal()] -
+                GameState.pieceBonus[oppColor.ordinal()];
         return pawnCountDiff + pieceCountDiff + pieceBonusDiff;
     }
 

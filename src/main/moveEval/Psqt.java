@@ -82,7 +82,7 @@ public class Psqt {
             {0, 0, 0, 0, 0, 0, 0, 0},
             };
 
-    public static Map<Color, int[][][]> table = new HashMap<>();
+    public static int[][][][] table = new int[2][Piece.values().length][8][8];
 
     static {
         int[][][] wTable = new int[7][8][8];
@@ -104,7 +104,7 @@ public class Psqt {
                         PieceBonus[pieceType.id][Square.flipRank(rank)][Square.edgeDistance(file)];
             }
         }
-        table.put(Color.W, wTable);
-        table.put(Color.B, bTable);
+        table[Color.W.ordinal()] = wTable;
+        table[Color.B.ordinal()] = bTable;
     }
 }

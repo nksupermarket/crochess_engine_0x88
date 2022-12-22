@@ -23,10 +23,10 @@ final public class GameState {
     // pieces
     // need to subtract 1 from Piece.id bc Piece enum starts with NULL
     public static Phase phase = Phase.MG;
-    public static Map<Color, Square[]> pieceList = new HashMap<>();
-    public static Map<Color, Integer> pawnCount = new HashMap<>();
-    public static Map<Color, Integer> pieceCount = new HashMap<>();
-    public static Map<Color, Integer> pieceBonus = new HashMap<>();
+    public static Square[][] pieceList = new Square[2][51];
+    public static int[] pawnCount = new int[2];
+    public static int[] pieceCount = new int[2];
+    public static int[] pieceBonus = new int[2];
     public static long zobristHash;
     public static Map<Long, Integer> totalRepititions = new HashMap<>();
 
@@ -38,15 +38,6 @@ final public class GameState {
 
     // init board + pieceList + get zobrish hash
     static {
-        pieceList.put(Color.W,
-                new Square[51]);
-        pieceList.put(Color.B,
-                new Square[51]);
-        pawnCount.put(Color.W, 0);
-        pawnCount.put(Color.B, 0);
-        pieceCount.put(Color.W, 0);
-        pieceCount.put(Color.B, 0);
-
         board[0] = Color.W.id | Piece.ROOK.id;
         board[1] = Color.W.id | Piece.KNIGHT.id;
         board[2] = Color.W.id | Piece.BISHOP.id;
@@ -64,7 +55,7 @@ final public class GameState {
         board[22] = Color.W.id | Piece.PAWN.id;
         board[23] = Color.W.id | Piece.PAWN.id;
 
-        final Square[] wPieceList = pieceList.get(Color.W);
+        final Square[] wPieceList = pieceList[Color.W.ordinal()];
         Arrays.fill(wPieceList,
                 Square.NULL);
         putPiece(Color.W, Piece.PAWN, Square.A2, false);
@@ -101,7 +92,7 @@ final public class GameState {
         board[102] = Color.B.id | Piece.PAWN.id;
         board[103] = Color.B.id | Piece.PAWN.id;
 
-        final Square[] bPieceList = pieceList.get(Color.B);
+        final Square[] bPieceList = pieceList[Color.B.ordinal()];
         Arrays.fill(bPieceList,
                 Square.NULL);
         putPiece(Color.B, Piece.PAWN, Square.A7, false);
@@ -156,9 +147,9 @@ final public class GameState {
 
     public static void printState() {
         System.out.println(activeColor);
-        System.out.println(pieceCount);
-        System.out.println(Arrays.toString(pieceList.get(Color.W)));
-        System.out.println(Arrays.toString(pieceList.get(Color.B)));
+        System.out.println(Arrays.toString(pieceCount));
+        System.out.println(Arrays.toString(pieceList[Color.W.ordinal()]));
+        System.out.println(Arrays.toString(pieceList[Color.B.ordinal()]));
         System.out.println(castleRights);
         System.out.println(enPassant);
     }
@@ -168,17 +159,15 @@ final public class GameState {
                                 Square square, boolean listOnly) {
         if (!listOnly) {
             switch (piece) {
-                case PAWN -> pawnCount.merge(color, Score.get(piece.value), Integer::sum);
+                case PAWN -> pawnCount[color.ordinal()] += Score.get(piece.value);
                 case KING -> {
                 }
-                default -> pieceCount.merge(color, Score.get(piece.value), Integer::sum);
+                default -> pieceCount[color.ordinal()] += Score.get(piece.value);
             }
-
-            pieceBonus.merge(color,
-                    Score.get(Psqt.table.get(color)[piece.id][Square.getRank(square)][Square.getFile(square)]),
-                    Integer::sum);
+            pieceBonus[color.ordinal()] +=
+                    Score.get(Psqt.table[color.ordinal()][piece.id][Square.getRank(square)][Square.getFile(square)]);
         }
-        Square[] list = pieceList.get(color);
+        Square[] list = pieceList[color.ordinal()];
 
         int startIdx = (piece.id - 1) * 10;
         // only one slot for king
@@ -193,29 +182,26 @@ final public class GameState {
 
     public static void removePiece(Color color, Piece piece, Square square, boolean listOnly) {
         if (!listOnly) {
-            if (piece == Piece.PAWN) pawnCount.merge(color, -Score.get(piece.value), Integer::sum);
-            else pieceCount.merge(color, -Score.get(piece.value), Integer::sum);
+            if (piece == Piece.PAWN) pawnCount[color.ordinal()] -= Score.get(piece.value);
+            else pieceCount[color.ordinal()] -= Score.get(piece.value);
 
-            pieceBonus.merge(color,
-                    -Score.get(Psqt.table.get(color)[piece.id][Square.getRank(square)][Square.getFile(square)]),
-                    Integer::sum);
+            pieceBonus[color.ordinal()] -=
+                    Score.get(Psqt.table[color.ordinal()][piece.id][Square.getRank(square)][Square.getFile(square)]);
         }
-        pieceList.get(color)[Utils.findIndexOf(square, pieceList.get(color))] = Square.NULL;
+        pieceList[color.ordinal()][Utils.findIndexOf(square, pieceList[color.ordinal()])] = Square.NULL;
     }
 
     public static void moveInPieceList(Color color, Square from, Square to) {
-        pieceList.get(color)[Utils.findIndexOf(from,
-                pieceList.get(color))] = to;
+        pieceList[color.ordinal()][Utils.findIndexOf(from, pieceList[color.ordinal()])] = to;
     }
 
     public static void moveInPieceList(Color color, Piece piece, Square from, Square to) {
-        pieceBonus.merge(color,
-                -Score.get(Psqt.table.get(color)[piece.id][Square.getRank(from)][Square.getFile(from)]),
-                Integer::sum);
-        pieceBonus.merge(color, Score.get(Psqt.table.get(color)[piece.id][Square.getRank(to)][Square.getFile(to)]),
-                Integer::sum);
-        pieceList.get(color)[Utils.findIndexOf(from,
-                pieceList.get(color))] = to;
+        pieceBonus[color.ordinal()] -=
+                Score.get(Psqt.table[color.ordinal()][piece.id][Square.getRank(from)][Square.getFile(from)]);
+        pieceBonus[color.ordinal()] +=
+                Score.get(Psqt.table[color.ordinal()][piece.id][Square.getRank(to)][Square.getFile(to)]);
+
+        pieceList[color.ordinal()][Utils.findIndexOf(from, pieceList[color.ordinal()])] = to;
     }
 
     public static int encodePrevState() {
@@ -225,19 +211,23 @@ final public class GameState {
     private static void resetState() {
         board = new int[128];
 
-        Arrays.fill(pieceList.get(Color.W),
+        phase = Phase.MG;
+        enPassant = Square.NULL;
+        halfmoves = 0;
+
+        Arrays.fill(pieceList[Color.W.ordinal()],
                 Square.NULL);
-        Arrays.fill(pieceList.get(Color.B),
+        Arrays.fill(pieceList[Color.B.ordinal()],
                 Square.NULL);
 
-        pieceCount.put(Color.W, 0);
-        pieceCount.put(Color.B, 0);
+        pieceCount[Color.W.ordinal()] = 0;
+        pieceCount[Color.B.ordinal()] = 0;
 
-        pawnCount.put(Color.W, 0);
-        pawnCount.put(Color.B, 0);
+        pawnCount[Color.W.ordinal()] = 0;
+        pawnCount[Color.B.ordinal()] = 0;
 
-        pieceBonus.put(Color.W, 0);
-        pieceBonus.put(Color.B, 0);
+        pieceBonus[Color.W.ordinal()] = 0;
+        pieceBonus[Color.B.ordinal()] = 0;
     }
 
     public static void loadFen(String fen) {
@@ -325,9 +315,9 @@ final public class GameState {
 
     public static boolean inCheck(Color color) {
         Color oppColor = Color.getOppColor(color);
-        return MoveGen.isAttacked(pieceList.get(color)[50],
+        return MoveGen.isAttacked(pieceList[color.ordinal()][50],
                 oppColor,
-                pieceList.get(oppColor)
+                pieceList[oppColor.ordinal()]
         );
     }
 
@@ -336,7 +326,7 @@ final public class GameState {
     }
 
     public static List<Integer> getValidMoves(Color color, boolean onlyCaptures, boolean onlyChecks) {
-        Square[] list = pieceList.get(color);
+        Square[] list = pieceList[color.ordinal()];
 
         List<Integer> moves = new ArrayList<>();
 
@@ -344,7 +334,8 @@ final public class GameState {
             if (list[idx] == Square.NULL) continue;
 
             if (idx == 50) {
-                moves.addAll(MoveGen.pseudoLegalForKing(list[50], color, pieceList.get(Color.getOppColor(color))));
+                moves.addAll(MoveGen.pseudoLegalForKing(list[50], color, pieceList[Color.getOppColor(color)
+                                                                                        .ordinal()]));
             } else if (idx < 10) {
                 moves.addAll(
                         MoveGen.pseudoLegalForPawn(list[idx], color));
@@ -376,11 +367,11 @@ final public class GameState {
             boolean capture = board[to.idx] != 0 || (pieceType == Piece.PAWN && to == enPassant);
             boolean check = false;
 
-            Square kingPos = pieceList.get(color)[50];
+            Square kingPos = pieceList[color.ordinal()][50];
             Color oppColor = Color.getOppColor(color);
 
             if (castle != null) {
-                if (Utils.findIndexOf(castle.rInitSquare, pieceList.get(color)) == -1) {
+                if (Utils.findIndexOf(castle.rInitSquare, pieceList[color.ordinal()]) == -1) {
                     Utils.printMove(move);
                     printBoard();
                 }
@@ -391,15 +382,15 @@ final public class GameState {
 
                 valid = !MoveGen.isAttacked(to,
                         oppColor,
-                        pieceList.get(oppColor));
+                        pieceList[oppColor.ordinal()]);
                 if (onlyChecks) {
-                    pieceList.get(activeColor)[50] = castle.square;
+                    pieceList[activeColor.ordinal()][50] = castle.square;
 
                     moveInPieceList(activeColor, castle.rInitSquare, castle.rSquare);
 
                     check = inCheck(oppColor);
 
-                    pieceList.get(activeColor)[50] = from;
+                    pieceList[activeColor.ordinal()][50] = from;
                     moveInPieceList(activeColor, castle.rSquare, castle.rInitSquare);
                 }
 
@@ -440,7 +431,7 @@ final public class GameState {
 
                 valid = !MoveGen.isAttacked(pieceType == Piece.KING ? to : kingPos,
                         oppColor,
-                        pieceList.get(oppColor));
+                        pieceList[oppColor.ordinal()]);
                 if (onlyChecks) {
                     int promote = move >> 18;
                     if (promote != 0) {
@@ -472,31 +463,33 @@ final public class GameState {
     }
 
     private static void checkPhase() {
-        if (phase == Phase.MG && pieceCount.get(Color.W) + pieceCount.get(Color.B) <= Phase.EG.limit) {
+        if (phase == Phase.MG && pieceCount[Color.W.ordinal()] + pieceCount[Color.B.ordinal()] <= Phase.EG.limit) {
             phase = Phase.EG;
             recalibrateCount();
         }
     }
 
     private static void recalibrateCount() {
-        pawnCount.put(Color.W, 0);
-        pawnCount.put(Color.B, 0);
+        pawnCount[Color.W.ordinal()] = 0;
+        pawnCount[Color.B.ordinal()] = 0;
 
-        pieceCount.put(Color.W, 0);
-        pieceCount.put(Color.B, 0);
+        pieceCount[Color.W.ordinal()] = 0;
+        pieceCount[Color.B.ordinal()] = 0;
 
         // iterate over every piece type execept the king
-        for (int i = 0; i < pieceList.get(Color.W).length - 1; i++) {
+        for (int i = 0; i < pieceList[Color.W.ordinal()].length - 1; i++) {
             int pieceId = (i / 10) + 1;
             Piece piece = Piece.lookup.get(pieceId);
-            Map<Color, Integer> countMap;
+            int[] countMap;
 
             if (pieceId == 1) {
                 countMap = pawnCount;
             } else countMap = pieceCount;
 
-            if (pieceList.get(Color.W)[i] != Square.NULL) countMap.merge(Color.W, Score.get(piece.value), Integer::sum);
-            if (pieceList.get(Color.B)[i] != Square.NULL) countMap.merge(Color.B, Score.get(piece.value), Integer::sum);
+            if (pieceList[Color.W.ordinal()][i] != Square.NULL)
+                countMap[Color.W.ordinal()] += Score.get(piece.value);
+            if (pieceList[Color.B.ordinal()][i] != Square.NULL)
+                countMap[Color.B.ordinal()] += Score.get(piece.value);
         }
     }
 
@@ -578,7 +571,7 @@ final public class GameState {
         }
 
         if (capturedPiece != 0) {
-            if (Utils.findIndexOf(capturePieceSquare, pieceList.get(oppColor)) == -1) {
+            if (Utils.findIndexOf(capturePieceSquare, pieceList[oppColor.ordinal()]) == -1) {
                 System.out.println(Arrays.toString(board));
                 GameState.printBoard();
             }
@@ -675,7 +668,7 @@ final public class GameState {
         if (activeColor == Color.B) zobristHash ^= ZobristKey.SIDE;
         activeColor = Color.getOppColor(activeColor);
 
-        if (Utils.findIndexOf(to, pieceList.get(activeColor)) == -1) {
+        if (Utils.findIndexOf(to, pieceList[activeColor.ordinal()]) == -1) {
             Utils.printMove((from.idx << 7) | to.idx);
             printBoard();
             printState();
@@ -746,35 +739,35 @@ final public class GameState {
         int wKnightCount = 0;
         int bKnightCount = 0;
 
-        for (int i = 0; i < pieceList.get(activeColor).length; i++) {
+        for (int i = 0; i < pieceList[activeColor.ordinal()].length; i++) {
             int pieceId = (i / 10) + 1;
             Piece pieceType = Piece.lookup.get(pieceId);
 
             switch (pieceType) {
                 case BISHOP -> {
-                    if (pieceList.get(Color.W)[i] != Square.NULL) {
+                    if (pieceList[Color.W.ordinal()][i] != Square.NULL) {
                         if (bKnightCount != 0) return false;
                         if (wBishopCount == 1) return false;
                         wBishopCount++;
 
-                        wBishopColor = Square.getColor(pieceList.get(Color.W)[i]);
+                        wBishopColor = Square.getColor(pieceList[Color.W.ordinal()][i]);
                         if (wBishopColor == bBishopColor) return false;
                     }
-                    if (pieceList.get(Color.B)[i] != Square.NULL) {
+                    if (pieceList[Color.B.ordinal()][i] != Square.NULL) {
                         if (wKnightCount != 0) return false;
                         if (bBishopCount == 1) return false;
                         bBishopCount++;
 
-                        bBishopColor = Square.getColor(pieceList.get(Color.B)[i]);
+                        bBishopColor = Square.getColor(pieceList[Color.B.ordinal()][i]);
                         if (wBishopColor == bBishopColor) return false;
                     }
                 }
 
                 case KNIGHT -> {
-                    if (pieceList.get(Color.W)[i] != Square.NULL) {
+                    if (pieceList[Color.W.ordinal()][i] != Square.NULL) {
                         wKnightCount++;
                     }
-                    if (pieceList.get(Color.B)[i] != Square.NULL) {
+                    if (pieceList[Color.B.ordinal()][i] != Square.NULL) {
                         bKnightCount++;
                     }
                     if (wKnightCount + bKnightCount == 2) return false;
@@ -784,8 +777,8 @@ final public class GameState {
                 }
 
                 default -> {
-                    if (pieceList.get(Color.W)[i] != Square.NULL ||
-                            pieceList.get(Color.B)[i] != Square.NULL) return false;
+                    if (pieceList[Color.W.ordinal()][i] != Square.NULL ||
+                            pieceList[Color.B.ordinal()][i] != Square.NULL) return false;
                 }
             }
         }

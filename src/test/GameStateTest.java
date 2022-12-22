@@ -153,15 +153,15 @@ public class GameStateTest {
             bPieceList[40] = Square.D8;
             bPieceList[50] = Square.E8;
 
-            MatcherAssert.assertThat(GameState.pieceList.get(Color.W),
+            MatcherAssert.assertThat(GameState.pieceList[Color.W.ordinal()],
                     is(wPieceList));
-            MatcherAssert.assertThat(GameState.pieceList.get(Color.B),
+            MatcherAssert.assertThat(GameState.pieceList[Color.B.ordinal()],
                     is(bPieceList));
         }
     }
 
     private boolean isPieceOnSquareInPieceList(Piece piece, Color color, Square square) {
-        Square[] list = GameState.pieceList.get(color);
+        Square[] list = GameState.pieceList[color.ordinal()];
 
         int startIdx = (piece.id - 1) * 10;
         // only one slot for king
@@ -177,10 +177,11 @@ public class GameStateTest {
 
     @Test
     public void pieceCountIsInitiatedCorrectly() {
-        MatcherAssert.assertThat(GameState.pieceCount.get(Color.W), is(GameState.pieceCount.get((Color.B))));
-        MatcherAssert.assertThat(GameState.pieceCount.get(Color.W), is(
-                8 * Piece.PAWN.value + 2 * Piece.ROOK.value +
-                        2 * Piece.KNIGHT.value + 2 * Piece.BISHOP.value + Piece.QUEEN.value + Piece.KING.value
+        MatcherAssert.assertThat(GameState.pieceCount[Color.W.ordinal()], is(GameState.pieceCount[Color.B.ordinal()]));
+        MatcherAssert.assertThat(GameState.pieceCount[Color.W.ordinal()], is(
+                2 * Score.get(Piece.ROOK.value) +
+                        2 * Score.get(Piece.KNIGHT.value) + 2 * Score.get(Piece.BISHOP.value) +
+                        Score.get(Piece.QUEEN.value)
         ));
     }
 
@@ -190,8 +191,8 @@ public class GameStateTest {
         public void cantCastleIntoCheck() {
             GameState.loadFen("rnbqkbn1/pppppppp/6r1/8/8/5N2/PPPPPP1P/RNBQK2R w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList.get(Color.W)[50], Color.W,
-                    GameState.pieceList.get(Color.B));
+            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList[Color.W.ordinal()][50], Color.W,
+                    GameState.pieceList[Color.B.ordinal()]);
             GameState.filterOutValidMoves(validMoves, false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.E1.idx], is(Color.W.id | Piece.KING.id));
@@ -219,8 +220,8 @@ public class GameStateTest {
         public void cantMoveKingIntoCheck() {
             GameState.loadFen("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR w KQkq - 0 1");
 
-            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList.get(Color.W)[50], Color.W,
-                    GameState.pieceList.get(Color.B));
+            List<Integer> validMoves = MoveGen.pseudoLegalForKing(GameState.pieceList[Color.W.ordinal()][50], Color.W,
+                    GameState.pieceList[Color.B.ordinal()]);
             GameState.filterOutValidMoves(validMoves, false, false);
 
             MatcherAssert.assertThat(GameState.board[Square.E2.idx], is(Color.W.id | Piece.KING.id));
@@ -236,10 +237,10 @@ public class GameStateTest {
         public void onlyCapturesAndOnlyChecks() {
             GameState.loadFen("r3rk2/pb4p1/4QbBp/1p1q4/2pP4/2P5/PP3PPP/R3R1K1 w - - 0 1");
 
-            Square[] oldWPieceList = GameState.pieceList.get(Color.W)
-                                                        .clone();
-            Square[] oldBPieceList = GameState.pieceList.get(Color.B)
-                                                        .clone();
+            Square[] oldWPieceList = GameState.pieceList[Color.W.ordinal()]
+                    .clone();
+            Square[] oldBPieceList = GameState.pieceList[Color.B.ordinal()]
+                    .clone();
             int[] boardCopy = GameState.board.clone();
             List<Integer> forcingMoves = GameState.getValidMoves(GameState.activeColor, true, true);
             List<Integer> expected = Arrays.asList((Square.E6.idx << 7) | Square.D5.idx,
@@ -249,10 +250,10 @@ public class GameStateTest {
                     (Square.E6.idx << 7) | Square.D6.idx);
             MatcherAssert.assertThat(forcingMoves.size(), is(expected.size()));
             MatcherAssert.assertThat(forcingMoves.containsAll(expected), is(true));
-            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList.get(Color.W))
+            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList[Color.W.ordinal()])
                                            .equals(Arrays.toString(oldWPieceList)),
                     is(true));
-            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList.get(Color.B))
+            MatcherAssert.assertThat(Arrays.toString(GameState.pieceList[Color.B.ordinal()])
                                            .equals(Arrays.toString(oldBPieceList)),
                     is(true));
             MatcherAssert.assertThat(Arrays.toString(GameState.board)
@@ -288,8 +289,8 @@ public class GameStateTest {
             GameState.makeMove((Square.E4.idx << 7) | Square.D5.idx);
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.W.id | Piece.PAWN.id));
             MatcherAssert.assertThat(isPieceOnSquareInPieceList(Piece.PAWN, Color.W, Square.D5), is(true));
-            MatcherAssert.assertThat(GameState.pieceCount.get(Color.W) - GameState.pieceCount.get(Color.B),
-                    is(Piece.PAWN.value));
+            MatcherAssert.assertThat(GameState.pawnCount[Color.W.ordinal()] - GameState.pawnCount[Color.B.ordinal()],
+                    is(Score.get(Piece.PAWN.value)));
         }
 
         @Test
@@ -309,7 +310,7 @@ public class GameStateTest {
 
                 MatcherAssert.assertThat(GameState.board[Square.A8.idx], is(Color.W.id | Piece.QUEEN.id));
                 MatcherAssert.assertThat(GameState.board[Square.B7.idx], is(0));
-                MatcherAssert.assertThat(GameState.pieceList.get(Color.W)[41], is(Square.A8));
+                MatcherAssert.assertThat(GameState.pieceList[Color.W.ordinal()][41], is(Square.A8));
                 MatcherAssert.assertThat(isPieceOnSquareInPieceList(Piece.PAWN, Color.W, Square.B7), is(false));
             }
         }
@@ -693,8 +694,8 @@ public class GameStateTest {
 
             MatcherAssert.assertThat(GameState.board[Square.E2.idx], is(Color.W.id | Piece.PAWN.id));
             MatcherAssert.assertThat(GameState.board[Square.E4.idx], not(Color.W.id | Piece.PAWN.id));
-            MatcherAssert.assertThat(Utils.findIndexOf(Square.E4, GameState.pieceList.get(Color.W)), is(-1));
-            MatcherAssert.assertThat(Utils.findIndexOf(Square.E2, GameState.pieceList.get(Color.W)), not(-1));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.E4, GameState.pieceList[Color.W.ordinal()]), is(-1));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.E2, GameState.pieceList[Color.W.ordinal()]), not(-1));
         }
 
         @Test
@@ -707,8 +708,8 @@ public class GameStateTest {
 
             MatcherAssert.assertThat(GameState.board[Square.E4.idx], is(Color.W.id | Piece.PAWN.id));
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.B.id | Piece.PAWN.id));
-            MatcherAssert.assertThat(Utils.findIndexOf(Square.E4, GameState.pieceList.get(Color.W)), not(-1));
-            MatcherAssert.assertThat(Utils.findIndexOf(Square.D5, GameState.pieceList.get(Color.B)), not(-1));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.E4, GameState.pieceList[Color.W.ordinal()]), not(-1));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.D5, GameState.pieceList[Color.B.ordinal()]), not(-1));
         }
 
         @Test
@@ -750,8 +751,8 @@ public class GameStateTest {
                     MatcherAssert.assertThat(GameState.board[Square.H1.idx], is(Color.W.id | Piece.ROOK.id));
                     MatcherAssert.assertThat(GameState.board[Square.F1.idx], not(Color.W.id | Piece.ROOK.id));
 
-                    MatcherAssert.assertThat(GameState.pieceList.get(Color.W)[50], is(Square.E1));
-                    MatcherAssert.assertThat(Utils.findIndexOf(Square.H1, GameState.pieceList.get(Color.W)),
+                    MatcherAssert.assertThat(GameState.pieceList[Color.W.ordinal()][50], is(Square.E1));
+                    MatcherAssert.assertThat(Utils.findIndexOf(Square.H1, GameState.pieceList[Color.W.ordinal()]),
                             not(-1));
                 }
 
@@ -769,8 +770,8 @@ public class GameStateTest {
                     MatcherAssert.assertThat(GameState.board[Square.H8.idx], is(Color.B.id | Piece.ROOK.id));
                     MatcherAssert.assertThat(GameState.board[Square.F8.idx], not(Color.B.id | Piece.ROOK.id));
 
-                    MatcherAssert.assertThat(GameState.pieceList.get(Color.B)[50], is(Square.E8));
-                    MatcherAssert.assertThat(Utils.findIndexOf(Square.H8, GameState.pieceList.get(Color.B)),
+                    MatcherAssert.assertThat(GameState.pieceList[Color.B.ordinal()][50], is(Square.E8));
+                    MatcherAssert.assertThat(Utils.findIndexOf(Square.H8, GameState.pieceList[Color.B.ordinal()]),
                             not(-1));
                 }
             }
@@ -790,8 +791,8 @@ public class GameStateTest {
                     MatcherAssert.assertThat(GameState.board[Square.A1.idx], is(Color.W.id | Piece.ROOK.id));
                     MatcherAssert.assertThat(GameState.board[Square.C1.idx], not(Color.W.id | Piece.ROOK.id));
 
-                    MatcherAssert.assertThat(GameState.pieceList.get(Color.W)[50], is(Square.E1));
-                    MatcherAssert.assertThat(Utils.findIndexOf(Square.A1, GameState.pieceList.get(Color.W)),
+                    MatcherAssert.assertThat(GameState.pieceList[Color.W.ordinal()][50], is(Square.E1));
+                    MatcherAssert.assertThat(Utils.findIndexOf(Square.A1, GameState.pieceList[Color.W.ordinal()]),
                             not(-1));
                 }
 
@@ -809,8 +810,8 @@ public class GameStateTest {
                     MatcherAssert.assertThat(GameState.board[Square.A8.idx], is(Color.B.id | Piece.ROOK.id));
                     MatcherAssert.assertThat(GameState.board[Square.D8.idx], not(Color.B.id | Piece.ROOK.id));
 
-                    MatcherAssert.assertThat(GameState.pieceList.get(Color.B)[50], is(Square.E8));
-                    MatcherAssert.assertThat(Utils.findIndexOf(Square.A8, GameState.pieceList.get(Color.B)),
+                    MatcherAssert.assertThat(GameState.pieceList[Color.B.ordinal()][50], is(Square.E8));
+                    MatcherAssert.assertThat(Utils.findIndexOf(Square.A8, GameState.pieceList[Color.B.ordinal()]),
                             not(-1));
                 }
             }
@@ -1244,13 +1245,14 @@ public class GameStateTest {
     class pieceBonus {
         @Test
         public void pawnOnE4() {
-            int initBonus = GameState.pieceBonus.get(Color.W);
-            System.out.println(GameState.pieceCount.get(Color.W));
+            int initBonus = GameState.pieceBonus[Color.W.ordinal()];
+            System.out.println(GameState.pieceCount[Color.W.ordinal()]);
             GameState.makeMove((Square.E2.idx << 7) | Square.E4.idx);
-            MatcherAssert.assertThat(Math.abs(GameState.pieceBonus.get(Color.W) - initBonus),
-                    is(Score.get(Psqt.table.get(Color.W)[Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
+            MatcherAssert.assertThat(Math.abs(GameState.pieceBonus[Color.W.ordinal()] - initBonus),
+                    is(Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
                             Square.E4)]) -
-                            Score.get(Psqt.table.get(Color.W)[Piece.PAWN.id][Square.getRank(Square.E2)][Square.getFile(
+                            Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(
+                                    Square.E2)][Square.getFile(
                                     Square.E2)])));
         }
     }
