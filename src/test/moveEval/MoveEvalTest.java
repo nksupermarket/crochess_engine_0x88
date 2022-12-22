@@ -25,6 +25,14 @@ public class MoveEvalTest {
         MatcherAssert.assertThat(bestMove, is(repeat));
     }
 
+    @Test
+    public void firstMove() {
+        GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        int bestMove = MoveEval.getBestMove(3);
+        Utils.printMove(bestMove);
+        MatcherAssert.assertThat(bestMove, is((Square.B1.idx << 7) | Square.C3.idx));
+    }
+
     @Nested
     class tactics {
         @Test
@@ -52,6 +60,12 @@ public class MoveEvalTest {
             GameState.loadFen("r1bqr2k/ppp3bp/2np2p1/8/2BnPQ2/2N2N2/PPPB1PP1/2KR3R w - - 0 0");
 
             int move1 = MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
+            MoveEval.getBestMove(5);
             MatcherAssert.assertThat(move1, is((Square.H1.idx << 7) | Square.H7.idx));
             GameState.makeMove((Square.H1.idx << 7) | Square.H7.idx);
 

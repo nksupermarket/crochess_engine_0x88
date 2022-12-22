@@ -68,17 +68,20 @@ final public class MoveEval {
         if (GameState.isCheckmate(GameState.activeColor)) return -CHECKMATE_VAL + levelsSearched;
         if (GameState.isCheckmate(Color.getOppColor(GameState.activeColor))) return CHECKMATE_VAL - levelsSearched;
 
+        Color oppColor = Color.getOppColor(GameState.activeColor);
+        int pawnCountDiff = GameState.pawnCount.get(GameState.activeColor) -
+                GameState.pawnCount.get(oppColor);
         int pieceCountDiff = GameState.pieceCount.get(GameState.activeColor) -
-                GameState.pieceCount.get(Color.getOppColor(GameState.activeColor));
+                GameState.pieceCount.get(oppColor);
         int pieceBonusDiff = GameState.pieceBonus.get(GameState.activeColor) -
-                GameState.pieceBonus.get(Color.getOppColor(GameState.activeColor));
-        return pieceCountDiff + pieceBonusDiff;
+                GameState.pieceBonus.get(oppColor);
+        return pawnCountDiff + pieceCountDiff + pieceBonusDiff;
     }
 
     private static int quiescence(int alpha, int beta, int levelsSearched) {
         if (levelsSearched == 12) return evaluate(levelsSearched);
         if (GameState.inCheck(GameState.activeColor)) {
-            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 1, alpha, beta);
+            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 1, -beta, -alpha);
             return ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : alphaBeta(1, alpha, beta, levelsSearched);
         }
 
@@ -120,7 +123,7 @@ final public class MoveEval {
 
     private static int alphaBeta(int depth, int alpha, int beta, int levelsSearched) {
         if (depth == 0) {
-            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, alpha, beta);
+            int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, -beta, -alpha);
             return ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : quiescence(alpha, beta, levelsSearched);
         }
 
@@ -165,6 +168,7 @@ final public class MoveEval {
 
         int bestMove = 0;
         int alpha = Integer.MIN_VALUE + 1;
+        int beta = Integer.MAX_VALUE;
 
         List<Integer> legalMoves = GameState.getValidMoves(GameState.activeColor, false, false);
         if (legalMoves.size() == 1) return legalMoves.get(0);
@@ -179,7 +183,7 @@ final public class MoveEval {
 
             int eval = 0;
             if (!GameState.isDraw()) {
-                int ttVal = TranspositionTable.probeVal(GameState.zobristHash, depth, alpha, Integer.MAX_VALUE);
+                int ttVal = TranspositionTable.probeVal(GameState.zobristHash, depth, alpha, beta);
                 eval = ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -alphaBeta(depth - 1,
                         Integer.MIN_VALUE + 1, -alpha, 1);
             }

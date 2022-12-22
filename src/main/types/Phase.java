@@ -1,7 +1,8 @@
 package main.types;
 
 public enum Phase {
-    MG(15258), EG(3915);
+
+    OPEN(19404), MG(15258), EG(3915);
 
     final public int limit;
 

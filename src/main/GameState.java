@@ -232,6 +232,12 @@ final public class GameState {
 
         pieceCount.put(Color.W, 0);
         pieceCount.put(Color.B, 0);
+
+        pawnCount.put(Color.W, 0);
+        pawnCount.put(Color.B, 0);
+
+        pieceBonus.put(Color.W, 0);
+        pieceBonus.put(Color.B, 0);
     }
 
     public static void loadFen(String fen) {

@@ -2,11 +2,13 @@ package test;
 
 import jdk.jfr.Description;
 import main.*;
+import main.moveEval.Psqt;
 import main.moveGen.*;
 import main.types.Castle;
 import main.types.Color;
 import main.types.Piece;
 import main.types.Square;
+import main.utils.Score;
 import main.utils.Utils;
 import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
@@ -1235,6 +1237,21 @@ public class GameStateTest {
 
                 MatcherAssert.assertThat(GameState.countNumOfPositions(5), is(164_075_551));
             }
+        }
+    }
+
+    @Nested
+    class pieceBonus {
+        @Test
+        public void pawnOnE4() {
+            int initBonus = GameState.pieceBonus.get(Color.W);
+            System.out.println(GameState.pieceCount.get(Color.W));
+            GameState.makeMove((Square.E2.idx << 7) | Square.E4.idx);
+            MatcherAssert.assertThat(Math.abs(GameState.pieceBonus.get(Color.W) - initBonus),
+                    is(Score.get(Psqt.table.get(Color.W)[Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
+                            Square.E4)]) -
+                            Score.get(Psqt.table.get(Color.W)[Piece.PAWN.id][Square.getRank(Square.E2)][Square.getFile(
+                                    Square.E2)])));
         }
     }
 }
