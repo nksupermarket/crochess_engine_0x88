@@ -325,6 +325,85 @@ final public class GameState {
         return inCheck(color) && getValidMoves(color, false, false).size() == 0;
     }
 
+    public static boolean isMoveValid(int move) {
+        Castle castle = Castle.lookup.get((move >> 14) & 15);
+        Square from = Square.lookup.get((move >> 7) & 127);
+        Square to = Square.lookup.get(move & 127);
+
+        Color color = Color.extractColor(board[from.idx]);
+        assert color != null;
+
+        Piece pieceType = Piece.extractPieceType(board[from.idx]);
+        Square kingPos = pieceList[color.ordinal()][50];
+        Color oppColor = Color.getOppColor(color);
+
+        switch (pieceType) {
+            case PAWN -> {
+                if (!MoveGen.pseudoLegalForPawn(from, color)
+                            .contains(move)) return false;
+            }
+            case KING -> {
+                if (!MoveGen.pseudoLegalForKing(from, color, pieceList[oppColor.ordinal()])
+                            .contains(move)) return false;
+            }
+            default -> {
+                if (!MoveGen.pseudoLegal(from, pieceType, color)
+                            .contains(move)) return false;
+            }
+        }
+        boolean valid;
+
+        if (castle != null) {
+            if (Utils.findIndexOf(castle.rInitSquare, pieceList[color.ordinal()]) == -1) {
+                Utils.printMove(move);
+                printBoard();
+            }
+            board[castle.square.idx] = board[from.idx];
+            board[from.idx] = 0;
+            board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
+            board[castle.rInitSquare.idx] = 0;
+
+            valid = !MoveGen.isAttacked(to,
+                    oppColor,
+                    pieceList[oppColor.ordinal()]);
+
+            board[from.idx] = board[castle.square.idx];
+            board[castle.square.idx] = 0;
+            board[castle.rInitSquare.idx] = board[castle.rSquare.idx];
+            board[castle.rSquare.idx] = 0;
+        } else if (pieceType == Piece.PAWN && to == enPassant) {
+
+            Square enPassantCaptureSquare = Square.lookup.get(
+                    to.idx + (color == Color.W ? main.moveGen.Vector.DOWN.offset :
+                            main.moveGen.Vector.UP.offset)
+            );
+
+            board[to.idx] = board[from.idx];
+            board[from.idx] = 0;
+            board[enPassantCaptureSquare.idx] = 0;
+
+            valid = !inCheck(color);
+
+            board[from.idx] = color.id | Piece.PAWN.id;
+            board[to.idx] = 0;
+            board[enPassantCaptureSquare.idx] = oppColor.id | Piece.PAWN.id;
+        } else {
+
+            int capturedPiece = board[to.idx];
+            board[to.idx] = board[from.idx];
+            board[from.idx] = 0;
+
+            valid = !MoveGen.isAttacked(pieceType == Piece.KING ? to : kingPos,
+                    oppColor,
+                    pieceList[oppColor.ordinal()]);
+
+            board[from.idx] = color.id | pieceType.id;
+            board[to.idx] = capturedPiece;
+        }
+
+        return valid;
+    }
+
     public static List<Integer> getValidMoves(Color color, boolean onlyCaptures, boolean onlyChecks) {
         Square[] list = pieceList[color.ordinal()];
 

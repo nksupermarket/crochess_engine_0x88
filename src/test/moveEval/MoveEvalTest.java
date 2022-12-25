@@ -110,6 +110,13 @@ public class MoveEvalTest {
         }
 
         @Test
+        public void blunderPos2() {
+            GameState.loadFen("rnb1kb1r/pppp1ppp/5q2/8/4n3/5N2/PPPPBPPP/RNBQ1RK1 b kq - 0 1");
+            int bestMove = MoveEval.getBestMove(5);
+            Utils.printMove(bestMove);
+        }
+
+        @Test
         public void posDebug() {
             GameState.loadFen("4k3/8/r2p1n2/P3p3/3pP2R/R7/4K3/8 w - - 19 52 \u0000");
             Utils.printMove(MoveEval.getBestMove(5));
