@@ -1,1 +1,0 @@
-java main.moveGen.GameState "$1" "$2" "$3"
