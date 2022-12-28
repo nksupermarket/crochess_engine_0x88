@@ -228,6 +228,8 @@ final public class GameState {
 
         pieceBonus[Color.W.ordinal()] = 0;
         pieceBonus[Color.B.ordinal()] = 0;
+
+        totalRepititions.clear();
     }
 
     public static void loadFen(String fen) {
@@ -968,17 +970,29 @@ final public class GameState {
         return true;
     }
 
-    public static boolean isDrawByRepitition(long mostRecentHash) {
-        return totalRepititions.get(mostRecentHash) == 3;
+    public static boolean isDrawByRepitition(long mostRecentHash, boolean forced) {
+        return forced ? totalRepititions.get(mostRecentHash) == 5 : totalRepititions.get(mostRecentHash) == 3;
     }
 
-    public static boolean isDrawByMoveRule() {
-        int MAX_MOVES = 100;
+    public static boolean isDrawByMoveRule(boolean forced) {
+        int MAX_MOVES = forced ? 150 : 100;
         return halfmoves == MAX_MOVES;
     }
 
+    // for engine use
     public static boolean isDraw() {
-        return isDrawByMoveRule() || isDrawByRepitition(GameState.zobristHash) || isDrawByInsufficientMaterial();
+        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false) ||
+                isDrawByInsufficientMaterial();
+    }
+
+    // for vali
+    public static boolean isUnforcedDraw() {
+        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false);
+    }
+
+    public static boolean isForcedDraw() {
+        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false) ||
+                isDrawByInsufficientMaterial();
     }
 
     public static int countNumOfPositions(int depth, boolean print) {
