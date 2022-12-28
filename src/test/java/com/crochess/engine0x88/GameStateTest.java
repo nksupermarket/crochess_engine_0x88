@@ -1,11 +1,7 @@
 package com.crochess.engine0x88;
 
-import com.crochess.engine0x88.GameState;
-import com.crochess.engine0x88.ZobristKey;
 import jdk.jfr.Description;
-import com.crochess.engine0x88.*;
 import com.crochess.engine0x88.moveEval.Psqt;
-import com.crochess.engine0x88.moveGen.*;
 import com.crochess.engine0x88.types.Castle;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.types.Piece;
@@ -1249,7 +1245,6 @@ public class GameStateTest {
         @Test
         public void pawnOnE4() {
             int initBonus = GameState.pieceBonus[Color.W.ordinal()];
-            System.out.println(GameState.pieceCount[Color.W.ordinal()]);
             GameState.makeMove((Square.E2.idx << 7) | Square.E4.idx);
             MatcherAssert.assertThat(Math.abs(GameState.pieceBonus[Color.W.ordinal()] - initBonus),
                     is(Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
@@ -1257,6 +1252,140 @@ public class GameStateTest {
                             Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(
                                     Square.E2)][Square.getFile(
                                     Square.E2)])));
+        }
+    }
+
+    @Nested
+    class createMoveNotation {
+        @Test
+        public void basicPawnMove() {
+            int move = GameState.encodeMove(Square.E2, Square.E4);
+            int captureDetails = GameState.makeMove(move);
+
+            MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("e4"));
+        }
+
+        @Test
+        public void pawnCapture() {
+            GameState.loadFen("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+            int move = GameState.encodeMove(Square.E4, Square.D5);
+            int captureDetails = GameState.makeMove(move);
+
+            MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("exd5"));
+        }
+
+        @Test
+        public void enPassantCapture() {
+            GameState.loadFen("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1");
+            int move = GameState.encodeMove(Square.E5, Square.D6);
+            int captureDetails = GameState.makeMove(move);
+
+            MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("exd6"));
+        }
+
+        @Nested
+        class multiplePiecesCanGoToTheSameSquare {
+            @Test
+            public void diffRankAndFile() {
+                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3pP3/8/2N5/PPPP1PPP/R1BQKBNR w KQkq - 0 1");
+                int move = GameState.encodeMove(Square.C3, Square.E2);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("Nce2"));
+            }
+
+            @Test
+            public void diffRank() {
+                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3pP3/4N3/8/PPPPNPPP/R1BQKBNR w KQkq - 0 1");
+                int move = GameState.encodeMove(Square.E4, Square.C3);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("N4c3"));
+            }
+
+            @Test
+            public void diffFile() {
+                GameState.loadFen("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/R1NQKBNR w KQkq - 0 1");
+                int move = GameState.encodeMove(Square.C1, Square.E2);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("Nce2"));
+            }
+        }
+
+        @Test
+        public void checksWork() {
+            GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3pP3/5P2/8/PPPP2PP/R1NQKBNR b KQkq - 0 1");
+            int move = GameState.encodeMove(Square.D8, Square.H4);
+            int captureDetails = GameState.makeMove(move);
+
+            MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("Qh4+"));
+        }
+
+        @Test
+        public void checkmateWorks() {
+            GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3pP3/5P2/8/PPPP2PP/R1NQKBNR b KQkq - 0 1");
+            int move = GameState.encodeMove(Square.D8, Square.H4);
+            int captureDetails = GameState.makeMove(move);
+
+            MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, true), is("Qh4#"));
+        }
+
+        @Nested
+        class promotion {
+            @BeforeEach
+            public void init() {
+                GameState.loadFen("6k1/P7/8/5K2/8/8/8/8 w - - 0 1");
+            }
+
+            @Test
+            public void queen() {
+                int move = GameState.encodeMove(Square.A7, Square.A8, Piece.QUEEN);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("a8=Q+"));
+            }
+
+            @Test
+            public void knight() {
+                int move = GameState.encodeMove(Square.A7, Square.A8, Piece.KNIGHT);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("a8=N"));
+            }
+
+            @Test
+            public void capture() {
+                GameState.loadFen("1r4k1/P7/8/5K2/8/8/8/8 w - - 0 1");
+                int move = GameState.encodeMove(Square.A7, Square.B8, Piece.KNIGHT);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("axb8=N"));
+            }
+        }
+
+        @Nested
+        class castling {
+            @BeforeEach
+            public void init() {
+                GameState.loadFen("1r4k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+            }
+
+            @Test
+            public void kingside() {
+                int move = GameState.encodeMove(Square.E1, Square.G1, Castle.W_K);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("0-0"));
+            }
+
+            @Test
+            public void queenside() {
+                int move = GameState.encodeMove(Square.E1, Square.C1, Castle.W_Q);
+                int captureDetails = GameState.makeMove(move);
+
+                MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("0-0-0"));
+            }
         }
     }
 }

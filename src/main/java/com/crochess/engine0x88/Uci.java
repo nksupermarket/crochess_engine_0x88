@@ -1,4 +1,4 @@
-package com.crochess.engine0x88.uci;
+package com.crochess.engine0x88;
 
 import com.crochess.engine0x88.*;
 import com.crochess.engine0x88.moveEval.MoveEval;

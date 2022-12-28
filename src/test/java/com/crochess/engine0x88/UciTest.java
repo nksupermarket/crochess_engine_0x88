@@ -1,12 +1,9 @@
 package com.crochess.engine0x88;
 
-import com.crochess.engine0x88.GameState;
-import main.types.Castle;
-import main.GameState;
-import main.types.Piece;
-import main.types.Color;
-import main.types.Square;
-import main.uci.Uci;
+import com.crochess.engine0x88.types.Castle;
+import com.crochess.engine0x88.types.Piece;
+import com.crochess.engine0x88.types.Color;
+import com.crochess.engine0x88.types.Square;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 

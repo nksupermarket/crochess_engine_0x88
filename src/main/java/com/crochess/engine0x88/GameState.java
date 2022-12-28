@@ -1,9 +1,9 @@
 package com.crochess.engine0x88;
 
 import com.crochess.engine0x88.moveEval.Psqt;
-import com.crochess.engine0x88.moveGen.MoveGen;
-import com.crochess.engine0x88.moveGen.Vector;
 import com.crochess.engine0x88.types.*;
+import com.crochess.engine0x88.types.Vector;
+
 import com.crochess.engine0x88.utils.Score;
 import com.crochess.engine0x88.utils.Utils;
 
@@ -325,6 +325,18 @@ final public class GameState {
         return inCheck(color) && getValidMoves(color, false, false).size() == 0;
     }
 
+    public static int encodeMove(Square from, Square to) {
+        return (from.idx << 7) | to.idx;
+    }
+
+    public static int encodeMove(Square from, Square to, Castle castle) {
+        return ((castle.value << 14) | from.idx << 7) | to.idx;
+    }
+
+    public static int encodeMove(Square from, Square to, Piece promote) {
+        return (promote.id << 18 | from.idx << 7) | to.idx;
+    }
+
     public static boolean isMoveValid(int move) {
         Castle castle = Castle.lookup.get((move >> 14) & 15);
         Square from = Square.lookup.get((move >> 7) & 127);
@@ -374,8 +386,8 @@ final public class GameState {
         } else if (pieceType == Piece.PAWN && to == enPassant) {
 
             Square enPassantCaptureSquare = Square.lookup.get(
-                    to.idx + (color == Color.W ? com.crochess.engine0x88.moveGen.Vector.DOWN.offset :
-                            com.crochess.engine0x88.moveGen.Vector.UP.offset)
+                    to.idx + (color == Color.W ? Vector.DOWN.offset :
+                            Vector.UP.offset)
             );
 
             board[to.idx] = board[from.idx];
@@ -480,8 +492,8 @@ final public class GameState {
             } else if (pieceType == Piece.PAWN && to == enPassant) {
 
                 Square enPassantCaptureSquare = Square.lookup.get(
-                        to.idx + (color == Color.W ? com.crochess.engine0x88.moveGen.Vector.DOWN.offset :
-                                com.crochess.engine0x88.moveGen.Vector.UP.offset)
+                        to.idx + (color == Color.W ? Vector.DOWN.offset :
+                                Vector.UP.offset)
                 );
 
                 board[to.idx] = board[from.idx];
@@ -609,8 +621,8 @@ final public class GameState {
             zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][Piece.ROOK.id - 1][castle.rSquare.idx];
         } else if (pieceType == Piece.PAWN && to == enPassant) {
             Square enPassantCaptureSquare = Square.lookup.get(
-                    to.idx + (activeColor == Color.W ? com.crochess.engine0x88.moveGen.Vector.DOWN.offset :
-                            com.crochess.engine0x88.moveGen.Vector.UP.offset)
+                    to.idx + (activeColor == Color.W ? Vector.DOWN.offset :
+                            Vector.UP.offset)
             );
             capturedPiece = board[enPassantCaptureSquare.idx];
 
@@ -684,9 +696,9 @@ final public class GameState {
             zobristHash ^= ZobristKey.CASTLING_RIGHTS[activeColor.ordinal()][0];
         } else {
             if (pieceType == Piece.PAWN &&
-                    Math.abs(from.idx - to.idx) == 2 * (com.crochess.engine0x88.moveGen.Vector.UP.offset)) {
+                    Math.abs(from.idx - to.idx) == 2 * (Vector.UP.offset)) {
                 enPassant = Square.lookup.get(
-                        from.idx + (activeColor == Color.W ? com.crochess.engine0x88.moveGen.Vector.UP.offset :
+                        from.idx + (activeColor == Color.W ? Vector.UP.offset :
                                 Vector.DOWN.offset));
                 zobristHash ^= ZobristKey.EN_PASSANT[enPassant.idx];
             }
@@ -811,6 +823,94 @@ final public class GameState {
             zobristHash ^=
                     ZobristKey.PIECES[oppColor.ordinal()][(capturedPiece & 7) - 1][capturePieceSquare.idx];
         }
+    }
+
+    public static String createMoveNotation(int move, int captureDetails, boolean checkmate) {
+        Castle castle = Castle.lookup.get((move >> 14) & 15);
+        Square from = Square.lookup.get((move >> 7) & 127);
+        String fromNotation = from.name()
+                                  .toLowerCase();
+        Square to = Square.lookup.get(move & 127);
+        String toNotation = to.name()
+                              .toLowerCase();
+        Piece promote = Piece.extractPieceType(move >> 18);
+        Piece pieceType = Piece.extractPieceType(board[to.idx]);
+        char pieceNotation = pieceType != Piece.KNIGHT ? pieceType.name()
+                                                                  .charAt(0) : 'N';
+        Color color = Color.extractColor(board[to.idx]);
+
+        int capturedPiece = captureDetails & 31;
+        boolean capture = capturedPiece != 0;
+
+        String notation = "";
+
+        if (castle != null) {
+            switch (castle) {
+                case B_k, W_K -> notation = "0-0";
+                case B_q, W_Q -> notation = "0-0-0";
+            }
+        } else if (promote != Piece.NULL) {
+            String promoteNotation = promote == Piece.KNIGHT ? "=N" : "=" + promote.name()
+                                                                                   .charAt(0);
+            notation = capture ? fromNotation.charAt(0) + "x" + toNotation + promoteNotation :
+                    toNotation + promoteNotation;
+        } else {
+            switch (pieceType) {
+                case PAWN -> {
+                    notation = capture ? fromNotation.charAt(0) + "x" + toNotation : toNotation;
+                }
+
+                case KING -> {
+                    notation = capture ? pieceNotation + "x" + toNotation : pieceNotation + toNotation;
+                }
+
+                default -> {
+                    int pieceId = pieceType.id;
+                    Square[] pList = pieceList[color.ordinal()];
+                    board[to.idx] = 0;
+                    board[from.idx] = color.id | pieceType.id;
+                    moveInPieceList(color, to, from);
+
+                    List<Square> list = new ArrayList<>();
+                    // see how many pieces of the same piece type can move to the "to" square
+                    for (int i = 0; i < 10; i++) {
+                        int pieceListIdx = ((pieceId - 1) * 10) + i;
+                        Square square = pList[pieceListIdx];
+                        if (square == Square.NULL || square == from) continue;
+                        // if another piece can go to the same square
+                        if (isMoveValid(encodeMove(square, to))) {
+                            list.add(square);
+                        }
+                    }
+
+                    moveInPieceList(color, from, to);
+                    board[to.idx] = color.id | pieceType.id;
+                    board[from.idx] = 0;
+
+                    if (list.size() == 2) notation = capture ? pieceNotation + fromNotation + "x" + toNotation :
+                            pieceNotation + fromNotation + toNotation;
+                    else if (list.size() == 1) {
+                        // need to check if the piece is on the same rank or file as the move that moved
+                        // if same rank, differentiate the move using the file and vice-versa for rank
+                        char differentation;
+                        if (Square.getFile(from) != Square.getFile(list.get(0)))
+                            differentation = fromNotation.charAt(0);
+                        else differentation = fromNotation.charAt(1);
+
+                        notation = capture ? "" + pieceNotation + differentation + "x" + toNotation :
+                                "" + pieceNotation + differentation + toNotation;
+                    } else {
+                        notation = capture ? pieceNotation + "x" + toNotation :
+                                pieceNotation + toNotation;
+                    }
+                }
+            }
+        }
+
+        if (checkmate) notation += "#";
+        else if (inCheck(Color.getOppColor(color))) notation += "+";
+
+        return notation;
     }
 
     public static boolean isDrawByInsufficientMaterial() {

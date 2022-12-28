@@ -1,11 +1,7 @@
 package com.crochess.engine0x88;
 
-import com.crochess.engine0x88.GameState;
-import com.crochess.engine0x88.ZobristKey;
-import main.types.Color;
-import main.GameState;
-import main.types.Piece;
-import main.ZobristKey;
+import com.crochess.engine0x88.types.Color;
+import com.crochess.engine0x88.types.Piece;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 

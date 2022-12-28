@@ -1,10 +1,9 @@
 package com.crochess.engine0x88.moveEval;
 
-import main.*;
-import main.moveEval.MoveEval;
-import main.types.Square;
-import main.uci.Uci;
-import main.utils.Utils;
+import com.crochess.engine0x88.*;
+import com.crochess.engine0x88.types.Square;
+import com.crochess.engine0x88.Uci;
+import com.crochess.engine0x88.utils.Utils;
 import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;

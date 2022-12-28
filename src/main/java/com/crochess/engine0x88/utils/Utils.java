@@ -1,6 +1,6 @@
 package com.crochess.engine0x88.utils;
 
-import main.types.Square;
+import com.crochess.engine0x88.types.Square;
 
 final public class Utils {
     private Utils() {

@@ -1,7 +1,7 @@
 package com.crochess.engine0x88.utils;
 
-import main.GameState;
-import main.types.Phase;
+import com.crochess.engine0x88.GameState;
+import com.crochess.engine0x88.types.Phase;
 
 public class Score {
     public static int MIN_VAL = -200;

@@ -1,11 +1,10 @@
 package com.crochess.engine0x88.moveGen;
 
-import main.*;
-import main.moveGen.*;
-import main.types.Castle;
-import main.types.Color;
-import main.types.Piece;
-import main.types.Square;
+import com.crochess.engine0x88.*;
+import com.crochess.engine0x88.types.Castle;
+import com.crochess.engine0x88.types.Color;
+import com.crochess.engine0x88.types.Piece;
+import com.crochess.engine0x88.types.Square;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 
