@@ -17,8 +17,7 @@ public enum Vector {
 
     static {
         Arrays.stream(Vector.values())
-              .forEach(s -> lookup.put(s.offset,
-                      s));
+              .forEach(s -> lookup.put(s.offset, s));
     }
 
     public static Vector of(Integer value) {

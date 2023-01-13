@@ -5,6 +5,7 @@ import com.crochess.engine0x88.types.Castle;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.types.Piece;
 import com.crochess.engine0x88.types.Square;
+import com.crochess.moveValidator.Game;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 
@@ -51,6 +52,16 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4Q3/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegal(
+                    game,
+                    Square.E4,
+                    Piece.QUEEN,
+                    Color.W);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -74,6 +85,16 @@ public class MoveGenTest {
                                                             .map((v) -> (Square.E4.idx << 7) | v.idx)
                                                             .toList();
 
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4R3/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegal(
+                    game,
+                    Square.E4,
+                    Piece.ROOK,
+                    Color.W);
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -100,6 +121,16 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4B3/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegal(
+                    game,
+                    Square.E4,
+                    Piece.BISHOP,
+                    Color.W);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -122,6 +153,16 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/3rrr2/3rQr2/3rrr2/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegal(
+                    game,
+                    Square.E4,
+                    Piece.QUEEN,
+                    Color.W);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -133,6 +174,16 @@ public class MoveGenTest {
                     Piece.QUEEN,
                     Color.W);
 
+            MatcherAssert.assertThat(moves.size(),
+                    is(0));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/3RRR2/3RQR2/3RRR2/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegal(
+                    game,
+                    Square.E4,
+                    Piece.QUEEN,
+                    Color.W);
             MatcherAssert.assertThat(moves.size(),
                     is(0));
         }
@@ -158,6 +209,15 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4p3/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegalForPawn(
+                    game,
+                    Square.E4,
+                    Color.W);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -175,6 +235,15 @@ public class MoveGenTest {
                                                             .map((v) -> (Square.E4.idx << 7) | v.idx)
                                                             .toList();
 
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/3r1r2/4p3/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegalForPawn(
+                    game,
+                    Square.E4,
+                    Color.W);
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -196,6 +265,15 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/4p3/3R1R2/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegalForPawn(
+                    game,
+                    Square.E5,
+                    Color.B);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -215,6 +293,15 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/4p3/3RrR2/8/8/8 w KQkq - 0 1");
+            moves = MoveGen.pseudoLegalForPawn(
+                    game,
+                    Square.E5,
+                    Color.B);
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -232,6 +319,15 @@ public class MoveGenTest {
                                                             .map((v) -> (Square.E4.idx << 7) | v.idx)
                                                             .toList();
 
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4p3/8/8/8 w KQkq d3 0 1");
+            moves = MoveGen.pseudoLegalForPawn(
+                    game,
+                    Square.E4,
+                    Color.B);
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -261,6 +357,17 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/4K3/8/8/8 w - - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E4,
+                    Color.W,
+                    game.pieceList[Color.B.ordinal()]
+            );
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -273,6 +380,17 @@ public class MoveGenTest {
                     GameState.pieceList[Color.B.ordinal()]
             );
 
+            MatcherAssert.assertThat(moves.size(),
+                    is(0));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/3RRR2/3RKR2/3RRR2/8/8 w - - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E4,
+                    Color.W,
+                    game.pieceList[Color.B.ordinal()]
+            );
             MatcherAssert.assertThat(moves.size(),
                     is(0));
         }
@@ -305,6 +423,17 @@ public class MoveGenTest {
                                                             })
                                                             .toList();
 
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/8/8/8/4K3 w KQ - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E1,
+                    Color.W,
+                    game.pieceList[Color.B.ordinal()]
+            );
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -341,6 +470,17 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/8/8/8/4K3 w kq - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E8,
+                    Color.B,
+                    game.pieceList[Color.B.ordinal()]
+            );
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -371,6 +511,17 @@ public class MoveGenTest {
                                                             })
                                                             .toList();
 
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/8/8/8/4K3 w K - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E1,
+                    Color.W,
+                    game.pieceList[Color.B.ordinal()]
+            );
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -404,6 +555,17 @@ public class MoveGenTest {
                                                                 return (Square.E8.idx << 7) | v.idx;
                                                             })
                                                             .toList();
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/8/8/8/4K3 w q - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E8,
+                    Color.B,
+                    game.pieceList[Color.B.ordinal()]
+            );
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
         }
@@ -440,6 +602,17 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("8/8/8/8/8/3r4/8/4K3 w KQ - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E1,
+                    Color.W,
+                    game.pieceList[Color.B.ordinal()]
+            );
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
 
         @Test
@@ -474,6 +647,17 @@ public class MoveGenTest {
 
             MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
                     is(true));
+
+            Game game = new Game();
+            game.loadFen("4k3/8/8/8/8/5R2/8/4K3 w kq - 0 1");
+            moves = MoveGen.pseudoLegalForKing(
+                    game,
+                    Square.E8,
+                    Color.B,
+                    game.pieceList[Color.B.ordinal()]
+            );
+            MatcherAssert.assertThat(moves.containsAll(allExpectedMoves),
+                    is(true));
         }
     }
 
@@ -483,6 +667,14 @@ public class MoveGenTest {
 
         boolean attacked =
                 MoveGen.isAttacked(Castle.W_K.square, Color.B, GameState.pieceList[Color.B.ordinal()]);
+
+        MatcherAssert.assertThat(attacked, is(true));
+
+        Game game = new Game();
+        game.loadFen("rnbqkbn1/pppppppp/6r1/8/8/5N2/PPPPPP1P/RNBQK2R w KQkq - 0 1");
+
+        attacked =
+                MoveGen.isAttacked(game, Castle.W_K.square, Color.B, GameState.pieceList[Color.B.ordinal()]);
 
         MatcherAssert.assertThat(attacked, is(true));
     }

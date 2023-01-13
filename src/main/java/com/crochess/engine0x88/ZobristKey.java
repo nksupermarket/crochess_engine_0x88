@@ -3,6 +3,7 @@ package com.crochess.engine0x88;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.types.Piece;
 import com.crochess.engine0x88.types.Square;
+import com.crochess.moveValidator.Game;
 
 import java.util.Random;
 
@@ -61,6 +62,30 @@ final public class ZobristKey {
             hash ^= EN_PASSANT[GameState.enPassant.idx];
 
         if (GameState.activeColor == Color.B) hash ^= SIDE;
+
+        return hash;
+    }
+
+    public static long hash(Game game) {
+        long hash = 0;
+        // get zobrish hash
+        for (int i = 0; i < 120; i++) {
+            if (!Square.isValid(i)) continue;
+
+            int piece = game.board[i];
+            if (piece != 0) {
+                hash ^= PIECES[Color.extractColor(piece)
+                                    .ordinal()][Piece.extractPieceType(piece).id - 1][i];
+            }
+        }
+
+        hash ^= CASTLING_RIGHTS[Color.W.ordinal()][game.castleRights >> 2];
+        hash ^= CASTLING_RIGHTS[Color.B.ordinal()][game.castleRights & 3];
+
+        if (game.enPassant != Square.NULL)
+            hash ^= EN_PASSANT[game.enPassant.idx];
+
+        if (game.activeColor == Color.B) hash ^= SIDE;
 
         return hash;
     }

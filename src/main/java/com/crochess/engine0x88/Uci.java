@@ -6,6 +6,7 @@ import com.crochess.engine0x88.types.Castle;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.types.Piece;
 import com.crochess.engine0x88.types.Square;
+import com.crochess.moveValidator.Game;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,6 +107,28 @@ public class Uci {
             for (String moveNotation : moves) {
                 int move = algebraToMove(moveNotation);
                 GameState.makeMove(move);
+            }
+        }
+    }
+
+    public static void inputPosition(String input, Game game) {
+        input = input.substring(9)
+                     .concat(" ");
+        if (input.contains("startpos ")) {
+            input = input.substring(9);
+            game.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        } else if (input.contains("fen")) {
+            input = input.substring(4);
+            game.loadFen(input);
+        }
+
+        if (input.contains("moves")) {
+            input = input.substring(input.indexOf("moves") + 6);
+            //make each of the moves
+            String[] moves = input.split(" ");
+            for (String moveNotation : moves) {
+                int move = algebraToMove(moveNotation);
+                game.makeMove(move);
             }
         }
     }

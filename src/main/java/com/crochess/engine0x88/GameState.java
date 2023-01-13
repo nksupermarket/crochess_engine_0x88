@@ -315,6 +315,62 @@ final public class GameState {
         totalRepititions.put(zobristHash, 1);
     }
 
+    public static String getFen() {
+        StringBuilder fen = new StringBuilder();
+        int emptyFileCount = 0;
+
+        for (int rank = 7; rank >= 0; rank--) {
+            if (rank != 7) fen.append("/");
+
+            for (int file = 0; file < 8; file++) {
+                int idx = (rank * 16) + file;
+                int boardVal = board[idx];
+                if (boardVal == 0) {
+                    emptyFileCount++;
+                    if (file == 7) {
+                        fen.append(emptyFileCount);
+                        emptyFileCount = 0;
+                    }
+                    continue;
+                }
+
+                if (emptyFileCount != 0) {
+                    fen.append(emptyFileCount);
+                    emptyFileCount = 0;
+                }
+                Piece pType = Piece.extractPieceType(boardVal);
+                Color color = Color.extractColor(boardVal);
+
+                String piece = pType == Piece.KNIGHT ? "N" : String.valueOf(pType.name()
+                                                                                 .charAt(0));
+                String notation = color == Color.W ? piece : piece.toLowerCase();
+                fen.append(notation);
+            }
+        }
+
+        String color = " " + activeColor.name()
+                                        .toLowerCase();
+        fen.append(color);
+
+        String castle = " ";
+        if ((castleRights & 15) == 0) castle += "-";
+        else {
+            if ((castleRights & 8) != 0) castle += "K";
+            if ((castleRights & 4) != 0) castle += "Q";
+            if ((castleRights & 2) != 0) castle += "k";
+            if ((castleRights & 1) != 0) castle += "q";
+        }
+        fen.append(castle);
+
+        String enPassantStr = enPassant != Square.NULL ? " " + enPassant.name()
+                                                                        .toLowerCase() : " -";
+        fen.append(enPassantStr);
+        fen.append(" ");
+        fen.append(halfmoves);
+
+        return fen.toString();
+    }
+
     public static boolean inCheck(Color color) {
         Color oppColor = Color.getOppColor(color);
         return MoveGen.isAttacked(pieceList[color.ordinal()][50],
@@ -368,10 +424,6 @@ final public class GameState {
         boolean valid;
 
         if (castle != null) {
-            if (Utils.findIndexOf(castle.rInitSquare, pieceList[color.ordinal()]) == -1) {
-                Utils.printMove(move);
-                printBoard();
-            }
             board[castle.square.idx] = board[from.idx];
             board[from.idx] = 0;
             board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
@@ -464,10 +516,6 @@ final public class GameState {
             Color oppColor = Color.getOppColor(color);
 
             if (castle != null) {
-                if (Utils.findIndexOf(castle.rInitSquare, pieceList[color.ordinal()]) == -1) {
-                    Utils.printMove(move);
-                    printBoard();
-                }
                 board[castle.square.idx] = board[from.idx];
                 board[from.idx] = 0;
                 board[castle.rSquare.idx] = board[castle.rInitSquare.idx];
@@ -981,16 +1029,6 @@ final public class GameState {
 
     // for engine use
     public static boolean isDraw() {
-        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false) ||
-                isDrawByInsufficientMaterial();
-    }
-
-    // for vali
-    public static boolean isUnforcedDraw() {
-        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false);
-    }
-
-    public static boolean isForcedDraw() {
         return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false) ||
                 isDrawByInsufficientMaterial();
     }

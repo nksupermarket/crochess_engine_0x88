@@ -1082,12 +1082,12 @@ public class GameStateTest {
             GameState.makeMove((Square.G5.idx << 7) | Square.H6.idx);
             GameState.makeMove((Square.C4.idx << 7) | Square.D3.idx);
             GameState.makeMove((Square.H6.idx << 7) | Square.G5.idx);
-            MatcherAssert.assertThat(GameState.isDrawByRepitition(GameState.zobristHash), is(false));
+            MatcherAssert.assertThat(GameState.isDrawByRepitition(GameState.zobristHash, false), is(false));
             GameState.makeMove((Square.D3.idx << 7) | Square.C4.idx);
             GameState.makeMove((Square.G5.idx << 7) | Square.H6.idx);
             GameState.makeMove((Square.C4.idx << 7) | Square.D3.idx);
             GameState.makeMove((Square.H6.idx << 7) | Square.G5.idx);
-            MatcherAssert.assertThat(GameState.isDrawByRepitition(GameState.zobristHash), is(true));
+            MatcherAssert.assertThat(GameState.isDrawByRepitition(GameState.zobristHash, false), is(true));
         }
     }
 
@@ -1386,6 +1386,30 @@ public class GameStateTest {
 
                 MatcherAssert.assertThat(GameState.createMoveNotation(move, captureDetails, false), is("0-0-0"));
             }
+        }
+    }
+
+    @Nested
+    class convertToFen {
+        @Test
+        public void pos1() {
+            GameState.loadFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
+            MatcherAssert.assertThat(GameState.getFen(),
+                    is("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1"));
+        }
+
+        @Test
+        public void enPassant() {
+            GameState.loadFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
+            MatcherAssert.assertThat(GameState.getFen(),
+                    is("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0"));
+        }
+
+        @Test
+        public void castleRights() {
+            GameState.loadFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w - c6 0 2");
+            MatcherAssert.assertThat(GameState.getFen(),
+                    is("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w - c6 0"));
         }
     }
 }
