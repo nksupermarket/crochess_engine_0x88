@@ -1,0 +1,6 @@
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/moveValidator/GameTest.java
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/engine0x88/UciTest.java
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/engine0x88/ZobristKeyTest.java
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/engine0x88/moveGen/MoveGenTest.java
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java
+/home/alex/JavaProjects/chess-api/src/test/java/com/crochess/engine0x88/GameStateTest.java
