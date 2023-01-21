@@ -4,6 +4,7 @@ import com.crochess.engine0x88.types.Castle;
 import com.crochess.engine0x88.types.Piece;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.types.Square;
+import com.crochess.moveValidator.Game;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 
@@ -100,6 +101,22 @@ public class UciTest {
             Uci.inputGo();
             Uci.inputPosition("position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3");
             Uci.inputGo();
+        }
+
+        @Test
+        public void series2() {
+            Game moveValidator = new Game();
+
+            Uci.inputPosition(
+                    "position startpos moves e2e4 b8c6 d2d4 d7d5 e4e5 g8h6 c1h6 g7h6 h2h4 f8g7 g1f3 c8g4 c2c3 e8g8 " +
+                            "b1d2 f7f6",
+                    moveValidator);
+
+            Game mv2 = new Game();
+            Uci.inputPosition(
+                    "position startpos moves e2e4 b8c6 d2d4 d7d5 e4e5 g8h6 c1h6 g7h6 h2h4 f8g7 g1f3 c8g4 c2c3 e8g8 " +
+                            "b1d2 f7f6 e5f6 f8f6",
+                    mv2);
         }
     }
 }

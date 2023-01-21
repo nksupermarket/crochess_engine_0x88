@@ -8,6 +8,7 @@ import com.crochess.engine0x88.types.Piece;
 import com.crochess.engine0x88.types.Square;
 import com.crochess.moveValidator.Game;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -65,6 +66,40 @@ public class Uci {
         // handle castling
         if (Piece.extractPieceType(GameState.board[from]) == Piece.KING) {
             Color color = Color.extractColor(GameState.board[from]);
+
+            if (from - to == 2) {
+                move = color == Color.W ? (Castle.W_Q.value << 14) | move : (Castle.B_q.value << 14) | move;
+            } else if (
+                    from - to == -2
+            ) move = color == Color.W ? (Castle.W_K.value << 14) | move : (Castle.B_k.value << 14) | move;
+        }
+
+        if (moveNotation.length() == 5) {
+            Map<Character, Piece> pieceMap = new HashMap<>();
+            pieceMap.put('q',
+                    Piece.QUEEN);
+            pieceMap.put('r',
+                    Piece.ROOK);
+            pieceMap.put('n',
+                    Piece.KNIGHT);
+            pieceMap.put('b',
+                    Piece.BISHOP);
+
+            move = (pieceMap.get(moveNotation.charAt(4)).id << 18) | move;
+        }
+
+        return move;
+    }
+
+    public static int algebraToMove(String moveNotation, Game game) {
+        int from = moveNotation.charAt(0) - 'a' + (16 * (Character.getNumericValue(moveNotation.charAt(1)) - 1));
+        int to = moveNotation.charAt(2) - 'a' + (16 * (Character.getNumericValue(moveNotation.charAt(3)) - 1));
+
+        int move = (from << 7) | to;
+        // handle castling
+        if (Piece.extractPieceType(game.board[from]) == Piece.KING) {
+            Color color = Color.extractColor(game.board[from]);
+
             if (from - to == 2) {
                 move = color == Color.W ? (Castle.W_Q.value << 14) | move : (Castle.B_q.value << 14) | move;
             } else if (
@@ -127,7 +162,7 @@ public class Uci {
             //make each of the moves
             String[] moves = input.split(" ");
             for (String moveNotation : moves) {
-                int move = algebraToMove(moveNotation);
+                int move = algebraToMove(moveNotation, game);
                 game.makeMove(move);
             }
         }

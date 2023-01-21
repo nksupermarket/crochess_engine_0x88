@@ -45,7 +45,7 @@ public class Game {
         }
     }
 
-    public void removePiece(Color color, Piece piece, Square square) {
+    public void removePiece(Color color, Square square) {
         pieceList[color.ordinal()][Utils.findIndexOf(square, pieceList[color.ordinal()])] = Square.NULL;
     }
 
@@ -347,7 +347,7 @@ public class Game {
             if (promote != 0) {
                 board[to.idx] = activeColor.id | promote;
 
-                removePiece(activeColor, Piece.PAWN, from);
+                removePiece(activeColor, from);
                 putPiece(activeColor, Piece.extractPieceType(promote), to);
 
                 zobristHash ^= ZobristKey.PIECES[activeColor.ordinal()][0][from.idx];
@@ -365,7 +365,7 @@ public class Game {
                 System.out.println(Arrays.toString(board));
                 GameState.printBoard();
             }
-            removePiece(oppColor, Piece.extractPieceType(capturedPiece), capturePieceSquare);
+            removePiece(oppColor, capturePieceSquare);
 
             zobristHash ^= ZobristKey.PIECES[oppColor.ordinal()][(capturedPiece & 7) -
                     1][capturePieceSquare.idx];
@@ -695,11 +695,11 @@ public class Game {
     }
 
     public boolean isUnforcedDraw() {
-        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false);
+        return isDrawByMoveRule(false) || isDrawByRepitition(this.zobristHash, false);
     }
 
     public boolean isForcedDraw() {
-        return isDrawByMoveRule(false) || isDrawByRepitition(GameState.zobristHash, false) ||
+        return isDrawByMoveRule(false) || isDrawByRepitition(this.zobristHash, false) ||
                 isDrawByInsufficientMaterial();
     }
 }
