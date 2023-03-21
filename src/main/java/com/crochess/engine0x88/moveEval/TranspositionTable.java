@@ -31,15 +31,15 @@ public class TranspositionTable {
 
   public static void store(long zobrist, int depth, TT_Flag flag, int eval, int move) {
     int key = (int) (zobrist % TABLE_SIZE);
-
-    if (map.get(key) != null) {
-      TableEntry entry = map.get(key);
-      if (age > entry.age) {
-        map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
-      } else if (depth > map.get(key).depth) {
-        map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
-      }
-    } else map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+    return;
+    // if (map.get(key) != null) {
+    //   TableEntry entry = map.get(key);
+    //   if (age > entry.age) {
+    //     map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+    //   } else if (depth > map.get(key).depth) {
+    //     map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+    //   }
+    // } else map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
   }
 
   public static int probeVal(long zobrist, int depth, int alpha, int beta) {
