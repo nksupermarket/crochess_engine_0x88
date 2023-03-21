@@ -8,8 +8,6 @@ import com.crochess.engine0x88.types.TT_Flag;
 import java.util.Collections;
 import java.util.List;
 
-import com.crochess.engine0x88.utils.Utils;
-
 final public class MoveEval {
     private MoveEval() {
     }
@@ -95,7 +93,7 @@ final public class MoveEval {
 
         for (int i = 0; i < scores.length; i++) {
             pickMove(forcingMoves, scores, i);
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int captureDetails = GameState.makeMove(forcingMoves.get(i));
 
             int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, alpha, beta);
@@ -135,7 +133,7 @@ final public class MoveEval {
 
         for (int i = 0; i < scores.length; i++) {
             pickMove(legalMoves, scores, i);
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;
@@ -178,7 +176,7 @@ final public class MoveEval {
 
         for (int i = 0; i < legalMoves.size(); i++) {
             pickMove(legalMoves, scores, i);
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int captureDetails = GameState.makeMove(legalMoves.get(i));
 
             int eval = 0;

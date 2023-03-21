@@ -177,10 +177,10 @@ public class GameStateTest {
     @Test
     public void pieceCountIsInitiatedCorrectly() {
         MatcherAssert.assertThat(GameState.pieceCount[Color.W.ordinal()], is(GameState.pieceCount[Color.B.ordinal()]));
-        MatcherAssert.assertThat(GameState.pieceCount[Color.W.ordinal()], is(
-                2 * Score.get(Piece.ROOK.value) +
+        MatcherAssert.assertThat(GameState.pieceCount[Color.W.ordinal()], is((int)
+                (2 * Score.get(Piece.ROOK.value) +
                         2 * Score.get(Piece.KNIGHT.value) + 2 * Score.get(Piece.BISHOP.value) +
-                        Score.get(Piece.QUEEN.value)
+                        Score.get(Piece.QUEEN.value))
         ));
     }
 
@@ -289,7 +289,7 @@ public class GameStateTest {
             MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.W.id | Piece.PAWN.id));
             MatcherAssert.assertThat(isPieceOnSquareInPieceList(Piece.PAWN, Color.W, Square.D5), is(true));
             MatcherAssert.assertThat(GameState.pawnCount[Color.W.ordinal()] - GameState.pawnCount[Color.B.ordinal()],
-                    is(Score.get(Piece.PAWN.value)));
+                    is((int) Score.get(Piece.PAWN.value)));
         }
 
         @Test
@@ -668,7 +668,7 @@ public class GameStateTest {
         public void test() {
             GameState.loadFen("rnbqkbnr/p1pppppp/8/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 1");
             int move1 = (Square.A5.idx << 7) | Square.B6.idx;
-            int prevState1 = GameState.encodePrevState();
+            int prevState1 = GameState.encodeState();
             int captureDetails1 = GameState.makeMove(move1);
             GameState.unmakeMove(move1, prevState1, captureDetails1);
 
@@ -676,7 +676,7 @@ public class GameStateTest {
 
             GameState.loadFen("rnbqkbnr/pppppppp/8/1P6/8/8/P1PPPPPP/RNBQKBNR w KQkq - 0 1");
             int move2 = (Square.B5.idx << 7) | Square.B6.idx;
-            int prevState2 = GameState.encodePrevState();
+            int prevState2 = GameState.encodeState();
             int captureDetails2 = GameState.makeMove(move2);
             GameState.unmakeMove(move2, prevState2, captureDetails2);
 
@@ -686,7 +686,7 @@ public class GameStateTest {
         @Test
         public void regularMove() {
             GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int move = (Square.E2.idx << 7) | Square.E4.idx;
             int captureDetails = GameState.makeMove(move);
             GameState.unmakeMove(move, prevState, captureDetails);
@@ -700,7 +700,7 @@ public class GameStateTest {
         @Test
         public void capture() {
             GameState.loadFen("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int move = (Square.E4.idx << 7) | Square.D5.idx;
             int captureDetails = GameState.makeMove(move);
             GameState.unmakeMove(move, prevState, captureDetails);
@@ -712,10 +712,41 @@ public class GameStateTest {
         }
 
         @Test
+        public void enPassant() {
+            GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1");
+            int prevState = GameState.encodeState();
+            int move = GameState.encodeMove(Square.E5, Square.D6);
+            int captureDetails = GameState.makeMove(move);
+
+            GameState.unmakeMove(move, prevState, captureDetails);
+
+            MatcherAssert.assertThat(GameState.board[Square.E5.idx], is(Color.W.id | Piece.PAWN.id));
+            MatcherAssert.assertThat(GameState.board[Square.D5.idx], is(Color.B.id | Piece.PAWN.id));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.E5, GameState.pieceList[Color.W.ordinal()]), not(-1));
+            MatcherAssert.assertThat(Utils.findIndexOf(Square.D5, GameState.pieceList[Color.B.ordinal()]), not(-1));
+            MatcherAssert.assertThat(GameState.encodeState(), is(prevState));
+        }
+
+        @Test
+        public void stateIsDecodedCorrectly() {
+
+            GameState.loadFen("rnbqkbnr/ppp2ppp/4p3/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1");
+            System.out.println(GameState.enPassant.idx);
+            int prevState = GameState.encodeState();
+
+            System.out.println((prevState >> 2) & 127);
+            Square prevEnPassant = Square.lookup.get((prevState >> 2) & 127);
+            int prevCastleRights = (prevState >> 10) & 15;
+            int prevHalfmoves = prevState >> 14;
+
+            MatcherAssert.assertThat(GameState.enPassant, is(prevEnPassant));
+        }
+
+        @Test
         public void promotion() {
             GameState.loadFen("r3k2r/pPpq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/1PPQ1PPP/R3K2R w KQkq - 0 1");
 
-            int prevState = GameState.encodePrevState();
+            int prevState = GameState.encodeState();
             int move = ((Piece.QUEEN.id << 18) | Square.B7.idx << 7) | Square.A8.idx;
             int captureDetails = GameState.makeMove(move);
             GameState.unmakeMove(move, prevState, captureDetails);
@@ -740,7 +771,7 @@ public class GameStateTest {
                 @Test
                 public void whiteside() {
                     int prevState =
-                            GameState.encodePrevState();
+                            GameState.encodeState();
                     int move = (Castle.W_K.value << 14) | Square.E1.idx << 7;
                     int captureDetails = GameState.makeMove(move);
                     GameState.unmakeMove(move, prevState, captureDetails);
@@ -759,7 +790,7 @@ public class GameStateTest {
                 public void blackside() {
                     GameState.activeColor = Color.B;
                     int prevState =
-                            GameState.encodePrevState();
+                            GameState.encodeState();
                     int move = (Castle.B_k.value << 14) | Square.E8.idx << 7;
                     int captureDetails = GameState.makeMove(move);
                     GameState.unmakeMove(move, prevState, captureDetails);
@@ -780,7 +811,7 @@ public class GameStateTest {
                 @Test
                 public void whiteside() {
                     int prevState =
-                            GameState.encodePrevState();
+                            GameState.encodeState();
                     int move = (Castle.W_Q.value << 14) | Square.E1.idx << 7;
                     int captureDetails = GameState.makeMove(move);
                     GameState.unmakeMove(move, prevState, captureDetails);
@@ -799,7 +830,7 @@ public class GameStateTest {
                 public void blackside() {
                     GameState.activeColor = Color.B;
                     int prevState =
-                            GameState.encodePrevState();
+                            GameState.encodeState();
                     int move = (Castle.B_q.value << 14) | Square.E8.idx << 7;
                     int captureDetails = GameState.makeMove(move);
                     GameState.unmakeMove(move, prevState, captureDetails);
@@ -824,7 +855,7 @@ public class GameStateTest {
                 long hash = GameState.zobristHash;
 
                 int prevState =
-                        GameState.encodePrevState();
+                        GameState.encodeState();
                 int move = (Square.E2.idx << 7) | Square.E4.idx;
                 int captureDetails = GameState.makeMove(move);
                 GameState.unmakeMove(move, prevState, captureDetails);
@@ -838,7 +869,7 @@ public class GameStateTest {
                 long hash = GameState.zobristHash;
 
                 int prevState =
-                        GameState.encodePrevState();
+                        GameState.encodeState();
                 int move = (Square.E4.idx << 7) | Square.D5.idx;
                 int captureDetails = GameState.makeMove(move);
                 GameState.unmakeMove(move, prevState, captureDetails);
@@ -852,7 +883,7 @@ public class GameStateTest {
                 long hash = GameState.zobristHash;
 
                 int prevState =
-                        GameState.encodePrevState();
+                        GameState.encodeState();
                 int move = (Square.E7.idx << 7) | Square.E5.idx;
                 int captureDetails = GameState.makeMove(move);
                 GameState.unmakeMove(move, prevState, captureDetails);
@@ -866,7 +897,7 @@ public class GameStateTest {
                 long hash = GameState.zobristHash;
 
                 int prevState =
-                        GameState.encodePrevState();
+                        GameState.encodeState();
                 int move = (Square.E2.idx << 7) | Square.E4.idx;
                 int captureDetails = GameState.makeMove(move);
                 GameState.unmakeMove(move, prevState, captureDetails);
@@ -887,7 +918,7 @@ public class GameStateTest {
                     public void whiteside() {
                         long hash = GameState.zobristHash;
                         int prevState =
-                                GameState.encodePrevState();
+                                GameState.encodeState();
                         int move = (Square.E1.idx << 7) | Square.F1.idx;
                         int captureDetails = GameState.makeMove(move);
                         GameState.unmakeMove(move, prevState, captureDetails);
@@ -901,105 +932,14 @@ public class GameStateTest {
                         GameState.zobristHash ^= ZobristKey.SIDE;
                         long hash = GameState.zobristHash;
                         int prevState =
-                                GameState.encodePrevState();
+                                GameState.encodeState();
                         int move = (Square.E8.idx << 7) | Square.F8.idx;
                         int captureDetails = GameState.makeMove(move);
                         GameState.unmakeMove(move, prevState, captureDetails);
                         MatcherAssert.assertThat(GameState.zobristHash, is(hash));
                     }
                 }
-
-//                @Nested
-//                class whenRooksAreMoved {
-//                    @Nested
-//                    class kingside {
-//                        @Test
-//                        public void whiteside() {
-//                            long hash = GameState.zobristHash;
-//                            GameState.makeMove((Square.H1.idx << 7) | Square.G1.idx);
-//                            GameState.unmakeMove(unmakeDetails);
-//
-//                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-//                        }
-//
-//                        @Test
-//                        public void blackside() {
-//                            GameState.activeColor = Color.B;
-//                            GameState.zobristHash ^= ZobristKey.SIDE;
-//                            long hash = GameState.zobristHash;
-//
-//                            GameState.makeMove((Square.H8.idx << 7) | Square.F8.idx);
-//                            GameState.unmakeMove(unmakeDetails);
-//
-//                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-//                        }
-//                    }
-//
-//                    @Nested
-//                    class queenside {
-//                        @Test
-//                        public void whiteside() {
-//                            long hash = GameState.zobristHash;
-//                            GameState.makeMove((Square.A1.idx << 7) | Square.B1.idx);
-//                            GameState.unmakeMove(unmakeDetails);
-//
-//                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-//                        }
-//
-//                        @Test
-//                        public void blackside() {
-//                            GameState.activeColor = Color.B;
-//                            GameState.zobristHash ^= ZobristKey.SIDE;
-//                            long hash = GameState.zobristHash;
-//
-//                            GameState.makeMove((Square.A8.idx << 7) | Square.B8.idx);
-//                            GameState.unmakeMove(unmakeDetails);
-//
-//                            MatcherAssert.assertThat(hash, is(GameState.zobristHash));
-//                        }
-//                    }
-//                }
             }
-
-//            @Nested
-//            class castleMoves {
-//                @BeforeEach
-//                public void init() {
-//                    GameState.loadFen("r3k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQkq - 0 1");
-//                }
-//
-//                @Nested
-//                class kingside {
-//                    @Test
-//                    public void whiteside() {
-//                        long hash = GameState.zobristHash;
-//                        GameState.makeMove((Castle.W_K.value << 14) | Square.E1.idx << 7);
-//                        GameState.unmakeMove(unmakeDetails);
-//                        MatcherAssert.assertThat(GameState.zobristHash, is(hash));
-//                    }
-//
-//                    @Test
-//                    public void blackside() {
-//                        GameState.activeColor = Color.B;
-//                        GameState.zobristHash ^= ZobristKey.SIDE;
-//                        long hash = GameState.zobristHash;
-//                        GameState.makeMove((Castle.B_k.value << 14) | Square.E8.idx << 7);
-//                        GameState.unmakeMove(unmakeDetails);
-//                        MatcherAssert.assertThat(GameState.zobristHash, is(hash));
-//                    }
-//                }
-//            }
-//
-//            @Test
-//            public void promotion() {
-//                GameState.loadFen("r3k2r/pPpq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/1PPQ1PPP/R3K2R w KQkq - 0 1");
-//                long hash = GameState.zobristHash;
-//
-//                GameState.makeMove(((Piece.QUEEN.id << 18) | Square.B7.idx << 7) | Square.A8.idx);
-//                GameState.unmakeMove(unmakeDetails);
-//
-//                MatcherAssert.assertThat(GameState.zobristHash, is(hash));
-//            }
         }
     }
 
@@ -1141,7 +1081,6 @@ public class GameStateTest {
         }
 
         @Nested
-        @Disabled
         class perft {
             @Test
             public void onePly() {
@@ -1244,14 +1183,17 @@ public class GameStateTest {
     class pieceBonus {
         @Test
         public void pawnOnE4() {
+
+            GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
             int initBonus = GameState.pieceBonus[Color.W.ordinal()];
             GameState.makeMove((Square.E2.idx << 7) | Square.E4.idx);
             MatcherAssert.assertThat(Math.abs(GameState.pieceBonus[Color.W.ordinal()] - initBonus),
-                    is(Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
-                            Square.E4)]) -
+                    is((int) (Score.get(
+                            Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(Square.E4)][Square.getFile(
+                                    Square.E4)]) -
                             Score.get(Psqt.table[Color.W.ordinal()][Piece.PAWN.id][Square.getRank(
                                     Square.E2)][Square.getFile(
-                                    Square.E2)])));
+                                    Square.E2)]))));
         }
     }
 
@@ -1259,6 +1201,7 @@ public class GameStateTest {
     class createMoveNotation {
         @Test
         public void basicPawnMove() {
+            GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
             int move = GameState.encodeMove(Square.E2, Square.E4);
             int captureDetails = GameState.makeMove(move);
 
