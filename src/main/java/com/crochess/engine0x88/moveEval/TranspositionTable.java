@@ -31,42 +31,41 @@ public class TranspositionTable {
 
   public static void store(long zobrist, int depth, TT_Flag flag, int eval, int move) {
     int key = (int) (zobrist % TABLE_SIZE);
-    return;
-    // if (map.get(key) != null) {
-    //   TableEntry entry = map.get(key);
-    //   if (age > entry.age) {
-    //     map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
-    //   } else if (depth > map.get(key).depth) {
-    //     map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
-    //   }
-    // } else map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+
+    if (map.get(key) != null) {
+      TableEntry entry = map.get(key);
+      if (age > entry.age) {
+        map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+      } else if (depth > map.get(key).depth) {
+        map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+      }
+    } else map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
   }
 
   public static int probeVal(long zobrist, int depth, int alpha, int beta) {
+    int key = (int) (zobrist % (TABLE_SIZE / ENTRY_SIZE));
+    TableEntry entry = map.get(key);
+
+    if (entry == null || zobrist != entry.zobrist || depth > entry.depth) return UNKNOWN_VAL;
+
+    switch (entry.flag) {
+      case EXACT -> {
+        return entry.eval;
+      }
+      case ALPHA -> {
+        if (entry.eval <= alpha) return alpha;
+      }
+
+      case BETA -> {
+        if (entry.eval >= beta) return beta;
+      }
+    }
+
     return UNKNOWN_VAL;
-    // int key = (int) (zobrist % (ENTRY_SIZE * TABLE_SIZE));
-    // TableEntry entry = map.get(key);
-    //
-    // if (entry == null || zobrist != entry.zobrist || depth > entry.depth) return UNKNOWN_VAL;
-    //
-    // switch (entry.flag) {
-    //     case EXACT -> {
-    //         return entry.eval;
-    //     }
-    //     case ALPHA -> {
-    //         if (entry.eval <= alpha) return alpha;
-    //     }
-    //
-    //     case BETA -> {
-    //         if (entry.eval >= beta) return beta;
-    //     }
-    // }
-    //
-    // return UNKNOWN_VAL;
   }
 
   public static int probeMove(long zobrist, int depth) {
-    int key = (int) (zobrist % (ENTRY_SIZE * TABLE_SIZE));
+    int key = (int) (zobrist % (TABLE_SIZE / ENTRY_SIZE));
     TableEntry entry = map.get(key);
 
     if (entry == null
@@ -74,7 +73,6 @@ public class TranspositionTable {
         || depth > entry.depth
         || entry.flag != TT_Flag.EXACT) return 0;
 
-    // return entry.move;
-    return 0;
+    return entry.move;
   }
 }
