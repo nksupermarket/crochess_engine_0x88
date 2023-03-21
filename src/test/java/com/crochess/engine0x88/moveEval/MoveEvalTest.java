@@ -133,5 +133,12 @@ public class MoveEvalTest {
             MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
         }
+
+        @Test
+        public void blunder() {
+            GameState.loadFen(("r1bqkbnr/1pp2ppp/p1n5/3pp3/8/2NBPN2/PPPP1PPP/R1BQK2R w KQkq - 0 1"));
+            int bestMove = MoveEval.getBestMove(6);
+            Utils.printMove(bestMove);
+        }
     }
 }

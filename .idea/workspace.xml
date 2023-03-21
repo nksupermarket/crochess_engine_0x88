@@ -11,56 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/MoveGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/MoveGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/Uci.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/Uci.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Phase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Phase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Piece.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Piece.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/utils/DeltaArray.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/utils/Score.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/utils/Score.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/GameStateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/GameStateTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/GameState$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/GameState$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/GameState.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/GameState.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/MoveGen$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/MoveGen$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/MoveGen.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/MoveGen.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/Uci.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/Uci.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/moveEval/MoveEval.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/moveEval/MoveEval.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/moveEval/Psqt.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/moveEval/Psqt.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/types/Phase.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/types/Phase.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/types/Piece.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/types/Piece.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/utils/Score$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/utils/Score$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/utils/Score.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/crochess/engine0x88/utils/Score.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/crochess_api-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/crochess_api-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$convertToFen.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$convertToFen.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$castling.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$castling.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$multiplePiecesCanGoToTheSameSquare.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$multiplePiecesCanGoToTheSameSquare.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$promotion.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation$promotion.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$createMoveNotation.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByInsufficientMaterial$nonDrawPositions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByInsufficientMaterial$nonDrawPositions.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByInsufficientMaterial.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByInsufficientMaterial.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByRepetition.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$isDrawByRepetition.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$makeMove.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$makeMove.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest$getValidMoves.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest$getValidMoves.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest$perft.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest$perft.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$moveGenTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$pieceBonus.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$pieceBonus.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves$kingside.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves$kingside.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves$queenside.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves$queenside.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$castleMoves.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash$retoresPrevCastleRights$whenKingMoves.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash$retoresPrevCastleRights$whenKingMoves.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash$retoresPrevCastleRights.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash$retoresPrevCastleRights.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove$undoZobristHash.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest$unmakeMove.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/GameStateTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest$engineDebug.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest$engineDebug.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest$tactics.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest$tactics.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/crochess/engine0x88/moveEval/MoveEvalTest.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +97,7 @@
       <command value="mvn package" />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.GameStateTest$moveGenTest$perft.sixPly">
+  <component name="RunManager" selected="JUnit.MoveEvalTest$engineDebug.posDebug">
     <configuration name="GameStateTest$moveGenTest$perft.fivePly" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
@@ -177,7 +130,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MoveEvalTest$engineDebug.whyIsItBeingStupid" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="MoveEvalTest$engineDebug.blunder" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
         <pattern>
@@ -187,7 +140,23 @@
       </extension>
       <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
       <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest$engineDebug" />
-      <option name="METHOD_NAME" value="whyIsItBeingStupid" />
+      <option name="METHOD_NAME" value="blunder" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MoveEvalTest$engineDebug.posDebug" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.crochess.engine0x88.moveEval.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
+      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest$engineDebug" />
+      <option name="METHOD_NAME" value="posDebug" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -208,29 +177,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MoveEvalTest.firstMove" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.crochess.engine0x88.moveEval.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval" />
-      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
-      <option name="METHOD_NAME" value="firstMove" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.MoveEvalTest$engineDebug.posDebug" />
+        <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunder" />
         <item itemvalue="JUnit.GameStateTest$moveGenTest$perft.sixPly" />
         <item itemvalue="JUnit.GameStateTest$moveGenTest$perft.fivePly" />
         <item itemvalue="JUnit.MoveEvalTest" />
-        <item itemvalue="JUnit.MoveEvalTest.firstMove" />
-        <item itemvalue="JUnit.MoveEvalTest$engineDebug.whyIsItBeingStupid" />
       </list>
     </recent_temporary>
   </component>
@@ -277,9 +230,9 @@
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/GameStateTest.java</url>
-          <line>1136</line>
-          <option name="timeStamp" value="19" />
+          <url>file://$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java</url>
+          <line>139</line>
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
