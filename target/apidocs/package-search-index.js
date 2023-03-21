@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.crochess.engine0x88"},{"l":"com.crochess.engine0x88.moveEval"},{"l":"com.crochess.engine0x88.types"},{"l":"com.crochess.engine0x88.utils"},{"l":"com.crochess.moveValidator"}];updateSearchResults();
