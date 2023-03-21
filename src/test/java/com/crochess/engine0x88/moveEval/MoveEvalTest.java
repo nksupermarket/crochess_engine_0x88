@@ -117,9 +117,8 @@ public class MoveEvalTest {
         @Test
         public void posDebug() {
             GameState.loadFen("4k3/8/r2p1n2/P3p3/3pP2R/R7/4K3/8 w - - 19 52 \u0000");
-            Utils.printMove(MoveEval.getBestMove(5));
-            MoveEval.getBestMove(5);
-            Utils.printMove(MoveEval.getBestMove(5));
+            int bestMove = MoveEval.getBestMove(5);
+            Utils.printMove(bestMove);
         }
 
         @Test

@@ -22,7 +22,7 @@ public final class GameState {
     // amount of possible
     // pieces
     // need to subtract 1 from Piece.id bc Piece enum starts with NULL
-    public static Phase phase = Phase.MG;
+    public static Phase phase = Phase.BG;
     public static Square[][] pieceList = new Square[2][51];
     public static int[] pawnCount = new int[2];
     public static int[] pieceCount = new int[2];
@@ -213,7 +213,7 @@ public final class GameState {
     private static void resetState() {
         board = new int[128];
 
-        phase = Phase.MG;
+        phase = Phase.BG;
         enPassant = Square.NULL;
         halfmoves = 0;
 

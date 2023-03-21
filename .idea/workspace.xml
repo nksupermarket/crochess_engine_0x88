@@ -13,6 +13,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/TranspositionTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/TranspositionTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -98,22 +99,6 @@
     </option>
   </component>
   <component name="RunManager" selected="JUnit.MoveEvalTest$engineDebug.posDebug">
-    <configuration name="GameStateTest$moveGenTest$perft.fivePly" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chess-api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.crochess.engine0x88.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.GameStateTest.moveGenTest" />
-      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.GameStateTest$moveGenTest$perft" />
-      <option name="METHOD_NAME" value="fivePly" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="GameStateTest$moveGenTest$perft.sixPly" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
@@ -146,6 +131,22 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="MoveEvalTest$engineDebug.blunderPos2" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chess-api" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.crochess.engine0x88.moveEval.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
+      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest$engineDebug" />
+      <option name="METHOD_NAME" value="blunderPos2" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="MoveEvalTest$engineDebug.posDebug" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
@@ -162,7 +163,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MoveEvalTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="MoveEvalTest$engineDebug.whyIsItBeingStupid" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
         <pattern>
@@ -170,9 +171,10 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval" />
-      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="PACKAGE_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest" />
+      <option name="MAIN_CLASS_NAME" value="com.crochess.engine0x88.moveEval.MoveEvalTest$engineDebug" />
+      <option name="METHOD_NAME" value="whyIsItBeingStupid" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -180,10 +182,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.MoveEvalTest$engineDebug.posDebug" />
+        <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunderPos2" />
+        <item itemvalue="JUnit.MoveEvalTest$engineDebug.whyIsItBeingStupid" />
         <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunder" />
         <item itemvalue="JUnit.GameStateTest$moveGenTest$perft.sixPly" />
-        <item itemvalue="JUnit.GameStateTest$moveGenTest$perft.fivePly" />
-        <item itemvalue="JUnit.MoveEvalTest" />
       </list>
     </recent_temporary>
   </component>
@@ -222,17 +224,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java</url>
           <line>800</line>
           <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <condition expression="enPassant.idx == 127" language="JAVA" />
-          <url>file://$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/GameState.java</url>
-          <line>209</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java</url>
-          <line>139</line>
-          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
