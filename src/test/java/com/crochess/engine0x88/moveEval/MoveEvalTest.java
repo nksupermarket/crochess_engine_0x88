@@ -1,15 +1,14 @@
 package com.crochess.engine0x88.moveEval;
 
+import static org.hamcrest.CoreMatchers.*;
+
 import com.crochess.engine0x88.*;
-import com.crochess.engine0x88.types.Square;
 import com.crochess.engine0x88.Uci;
+import com.crochess.engine0x88.types.Square;
 import com.crochess.engine0x88.utils.Utils;
 import org.hamcrest.MatcherAssert;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
-
-
-import static org.hamcrest.CoreMatchers.*;
 
 public class MoveEvalTest {
     @Test
@@ -124,19 +123,21 @@ public class MoveEvalTest {
         @Test
         public void seriesDebug() {
             Uci.inputPosition(
-                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5 b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4");
+                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5"
+                            + " b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4");
             MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
             Uci.inputPosition(
-                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5 b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4 e6e5");
+                    "position startpos moves a2a3 a7a6 a3a4 a6a5 b2b3 b7b6 c2c3 c7c6 b3b4 a5b4 c3b4 c6c5 b4c5"
+                            + " b6c5 d2d3 d7d6 d3d4 c5d4 d1d4 e7e6 e2e4 e6e5");
             MoveEval.getBestMove(5);
             Utils.printMove(MoveEval.getBestMove(5));
         }
 
         @Test
         public void blunder() {
-            GameState.loadFen(("r1bqkbnr/1pp2ppp/p1n5/3pp3/8/2NBPN2/PPPP1PPP/R1BQK2R w KQkq - 0 1"));
-            int bestMove = MoveEval.getBestMove(6);
+            Uci.inputPosition("position startpos moves b1c3 e7e5 g1f3 b8c6 e2e3 a7a6 f1d3 d7d5");
+            int bestMove = MoveEval.getBestMove(5);
             Utils.printMove(bestMove);
         }
     }

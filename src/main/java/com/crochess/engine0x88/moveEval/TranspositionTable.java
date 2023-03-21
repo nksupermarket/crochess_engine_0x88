@@ -27,6 +27,15 @@ public class TranspositionTable {
       this.move = move;
       this.age = age;
     }
+
+    public void replace(long zobrist, int depth, TT_Flag flag, int eval, int move, int age) {
+      this.zobrist = zobrist;
+      this.depth = depth;
+      this.flag = flag;
+      this.eval = eval;
+      this.move = move;
+      this.age = age;
+    }
   }
 
   public static void store(long zobrist, int depth, TT_Flag flag, int eval, int move) {
@@ -35,7 +44,7 @@ public class TranspositionTable {
     if (map.get(key) != null) {
       TableEntry entry = map.get(key);
       if (age > entry.age) {
-        map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
+        entry.replace(zobrist, depth, flag, eval, move, age);
       } else if (depth > map.get(key).depth) {
         map.put(key, new TableEntry(zobrist, depth, flag, eval, move, age));
       }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public enum Piece {
   NULL(0),
-  PAWN(S(126, 126, 208)),
+  PAWN(S(126, 126, 280)),
   KNIGHT(S(781, 781, 854)),
   BISHOP(S(825, 825, 915)),
   ROOK(S(1276, 1276, 1380)),
