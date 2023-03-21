@@ -92,7 +92,7 @@
       <command value="mvn package" />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.MoveEvalTest$engineDebug.posDebug">
+  <component name="RunManager" selected="JUnit.MoveEvalTest$engineDebug.blunder">
     <configuration name="GameStateTest$moveGenTest$perft.sixPly" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chess-api" />
       <extension name="coverage">
@@ -175,10 +175,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunder" />
         <item itemvalue="JUnit.MoveEvalTest$engineDebug.posDebug" />
         <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunderPos2" />
         <item itemvalue="JUnit.MoveEvalTest$engineDebug.whyIsItBeingStupid" />
-        <item itemvalue="JUnit.MoveEvalTest$engineDebug.blunder" />
         <item itemvalue="JUnit.GameStateTest$moveGenTest$perft.sixPly" />
       </list>
     </recent_temporary>
