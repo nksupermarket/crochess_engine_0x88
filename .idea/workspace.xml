@@ -9,14 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/MoveGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/MoveGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/ZobristKey.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/ZobristKey.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Vector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/types/Vector.java" afterDir="false" />
-    </list>
+    <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
