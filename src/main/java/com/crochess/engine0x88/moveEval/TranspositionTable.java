@@ -38,7 +38,7 @@ public class TranspositionTable {
     }
 
     private static int getTableKey(long zobrist) {
-        int TABLE_SIZE = (0x100000 * 16) / 2; // divide by two because of negative numbers
+        int TABLE_SIZE = (0x100000 * 64) / 2; // divide by two because of negative numbers
         int ENTRY_SIZE = 40; // TableEntry is 40 bytes
         return (int) (zobrist % (TABLE_SIZE / ENTRY_SIZE));
     }

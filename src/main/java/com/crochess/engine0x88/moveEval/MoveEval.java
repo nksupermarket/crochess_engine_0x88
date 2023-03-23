@@ -3,7 +3,9 @@ package com.crochess.engine0x88.moveEval;
 import com.crochess.engine0x88.types.Color;
 import com.crochess.engine0x88.GameState;
 import com.crochess.engine0x88.types.Piece;
+import com.crochess.engine0x88.types.Square;
 import com.crochess.engine0x88.types.TT_Flag;
+import com.crochess.engine0x88.utils.Utils;
 
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +79,7 @@ final public class MoveEval {
     }
 
     private static int quiescence(int alpha, int beta, int levelsSearched) {
-        if (levelsSearched == 12) return evaluate(levelsSearched);
+        if (levelsSearched == 11) return evaluate(levelsSearched);
         if (GameState.inCheck(GameState.activeColor)) {
             int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 1, -beta, -alpha);
             return ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : alphaBeta(1, alpha, beta, levelsSearched);
@@ -97,9 +99,8 @@ final public class MoveEval {
             int captureDetails = GameState.makeMove(forcingMoves.get(i));
 
             int ttVal = TranspositionTable.probeVal(GameState.zobristHash, 0, alpha, beta);
-            int eval =
-                    ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -quiescence(-beta, -alpha, levelsSearched + 1);
-
+            int eval = ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal :
+                    -quiescence(-beta, -alpha, levelsSearched + 1);
             if (eval >= beta) {
                 TranspositionTable.store(GameState.zobristHash, 0, TT_Flag.BETA, beta, 0);
                 GameState.unmakeMove(forcingMoves.get(i), prevState, captureDetails);
@@ -135,13 +136,11 @@ final public class MoveEval {
             pickMove(legalMoves, scores, i);
             int prevState = GameState.encodeState();
             int captureDetails = GameState.makeMove(legalMoves.get(i));
-
             int eval = 0;
             if (!GameState.isDraw()) {
                 int ttVal = TranspositionTable.probeVal(GameState.zobristHash, depth, alpha, beta);
-                eval =
-                        ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -alphaBeta(depth - 1,
-                                -beta, -alpha, levelsSearched + 1);
+                eval = ttVal != TranspositionTable.UNKNOWN_VAL ? ttVal : -alphaBeta(depth - 1,
+                        -beta, -alpha, levelsSearched + 1);
             }
 
             if (eval >= beta) {

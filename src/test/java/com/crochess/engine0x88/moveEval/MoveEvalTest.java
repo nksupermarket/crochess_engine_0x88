@@ -26,7 +26,7 @@ public class MoveEvalTest {
     @Test
     public void firstMove() {
         GameState.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        int bestMove = MoveEval.getBestMove(5);
+        int bestMove = MoveEval.getBestMove(6);
         Utils.printMove(bestMove);
     }
 
