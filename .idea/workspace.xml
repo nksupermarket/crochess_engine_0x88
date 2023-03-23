@@ -11,10 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c480323b-7fea-48df-b943-12edce4efed6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/MoveEval.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/Psqt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/TranspositionTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/crochess/engine0x88/moveEval/TranspositionTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/crochess/engine0x88/moveEval/MoveEvalTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
