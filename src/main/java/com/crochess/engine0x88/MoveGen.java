@@ -48,7 +48,7 @@ public final class MoveGen {
   };
 
   private static void pushSlidingPieceMoves(
-      Square start, Color color, List<Integer> moveList, Vector[] vectors) {
+      Square start, Color color, List<Integer> moveList, List<Vector> vectors) {
     for (Vector vector : vectors) {
       int squareIdx = start.idx + vector.offset;
       while (Square.isValid(squareIdx)) {
@@ -62,7 +62,7 @@ public final class MoveGen {
   }
 
   private static void pushSlidingPieceMoves(
-      Game game, Square start, Color color, List<Integer> moveList, Vector[] vectors) {
+      Game game, Square start, Color color, List<Integer> moveList, List<Vector> vectors) {
     for (Vector vector : vectors) {
       int squareIdx = start.idx + vector.offset;
       while (Square.isValid(squareIdx)) {
@@ -86,27 +86,22 @@ public final class MoveGen {
 
     switch (pieceType) {
       case QUEEN -> {
-        pushSlidingPieceMoves(start, color, moves, Vector.values());
+        pushSlidingPieceMoves(start, color, moves, Vector.LIST);
         return moves;
       }
 
       case ROOK -> {
-        final Vector[] XY_VECTORS = {Vector.UP, Vector.DOWN, Vector.LEFT, Vector.RIGHT};
-        pushSlidingPieceMoves(start, color, moves, XY_VECTORS);
+        pushSlidingPieceMoves(start, color, moves, Vector.XY_VECTORS);
         return moves;
       }
 
       case BISHOP -> {
-        final Vector[] DIAGONAL_VECTORS = {
-          Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT, Vector.DOWN_RIGHT
-        };
-        pushSlidingPieceMoves(start, color, moves, DIAGONAL_VECTORS);
+        pushSlidingPieceMoves(start, color, moves, Vector.DIAGONAL_VECTORS);
         return moves;
       }
 
       case KNIGHT -> {
-        final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
-        for (int jump : KNIGHT_JUMPS) {
+        for (int jump : Vector.KNIGHT_JUMPS) {
           int jumpIdx = start.idx + jump;
           if (Square.isValid(jumpIdx) && (GameState.board[jumpIdx] & color.id) == 0)
             moves.add((start.idx << 7) | jumpIdx);
@@ -132,27 +127,22 @@ public final class MoveGen {
 
     switch (pieceType) {
       case QUEEN -> {
-        pushSlidingPieceMoves(game, start, color, moves, Vector.values());
+        pushSlidingPieceMoves(game, start, color, moves, Vector.LIST);
         return moves;
       }
 
       case ROOK -> {
-        final Vector[] XY_VECTORS = {Vector.UP, Vector.DOWN, Vector.LEFT, Vector.RIGHT};
-        pushSlidingPieceMoves(game, start, color, moves, XY_VECTORS);
+        pushSlidingPieceMoves(game, start, color, moves, Vector.XY_VECTORS);
         return moves;
       }
 
       case BISHOP -> {
-        final Vector[] DIAGONAL_VECTORS = {
-          Vector.UP_RIGHT, Vector.UP_LEFT, Vector.DOWN_LEFT, Vector.DOWN_RIGHT
-        };
-        pushSlidingPieceMoves(game, start, color, moves, DIAGONAL_VECTORS);
+        pushSlidingPieceMoves(game, start, color, moves, Vector.DIAGONAL_VECTORS);
         return moves;
       }
 
       case KNIGHT -> {
-        final int[] KNIGHT_JUMPS = {33, 31, 18, 14, -31, -33, -18, -14};
-        for (int jump : KNIGHT_JUMPS) {
+        for (int jump : Vector.KNIGHT_JUMPS) {
           int jumpIdx = start.idx + jump;
           if (Square.isValid(jumpIdx) && (game.board[jumpIdx] & color.id) == 0)
             moves.add((start.idx << 7) | jumpIdx);
@@ -189,7 +179,7 @@ public final class MoveGen {
   }
 
   public static boolean isAttacked(Square square, Color oppColor, Square[] oppPieceList) {
-    for (Piece piece : Piece.values()) {
+    for (Piece piece : Piece.list) {
       if (piece == Piece.NULL) continue;
       // iterating to 10 because each piece type gets 10 slots in the array except the king
       for (int i = 0; i < (piece == Piece.KING ? 1 : 10); i++) {
@@ -262,7 +252,7 @@ public final class MoveGen {
 
   public static boolean isAttacked(
       Game game, Square square, Color oppColor, Square[] oppPieceList) {
-    for (Piece piece : Piece.values()) {
+    for (Piece piece : Piece.list) {
       if (piece == Piece.NULL) continue;
       // iterating to 10 because each piece type gets 10 slots in the array except the king
       for (int i = 0; i < (piece == Piece.KING ? 1 : 10); i++) {
@@ -337,7 +327,7 @@ public final class MoveGen {
     // refer to pseudoLegal for breakdown of move representation
     List<Integer> moves = new ArrayList<>();
 
-    for (Vector vector : Vector.values()) {
+    for (Vector vector : Vector.LIST) {
       int squareIdx = start.idx + vector.offset;
       if (!Square.isValid(squareIdx)) continue;
       if ((GameState.board[squareIdx] & color.id) == 0) moves.add((start.idx << 7) | squareIdx);
@@ -376,7 +366,7 @@ public final class MoveGen {
     // refer to pseudoLegal for breakdown of move representation
     List<Integer> moves = new ArrayList<>();
 
-    for (Vector vector : Vector.values()) {
+    for (Vector vector : Vector.LIST) {
       int squareIdx = start.idx + vector.offset;
       if (!Square.isValid(squareIdx)) continue;
       if ((game.board[squareIdx] & color.id) == 0) moves.add((start.idx << 7) | squareIdx);
@@ -457,7 +447,7 @@ public final class MoveGen {
   }
 
   private static void pushCapturePawnMoves(
-      List<Integer> moveList, Vector[] captureVectors, Square start, Color color) {
+      List<Integer> moveList, List<Vector> captureVectors, Square start, Color color) {
     for (Vector vector : captureVectors) {
       int squareIdx = start.idx + vector.offset;
 
@@ -476,7 +466,7 @@ public final class MoveGen {
   }
 
   private static void pushCapturePawnMoves(
-      Game game, List<Integer> moveList, Vector[] captureVectors, Square start, Color color) {
+      Game game, List<Integer> moveList, List<Vector> captureVectors, Square start, Color color) {
     for (Vector vector : captureVectors) {
       int squareIdx = start.idx + vector.offset;
 
@@ -501,10 +491,7 @@ public final class MoveGen {
     boolean onStartSquare = start.toString().contains(color == Color.W ? "2" : "7");
     pushRegularPawnMoves(moves, start, color, onStartSquare);
 
-    final Vector[] captureVectors =
-        color == Color.W
-            ? new Vector[] {Vector.UP_RIGHT, Vector.UP_LEFT}
-            : new Vector[] {Vector.DOWN_RIGHT, Vector.DOWN_LEFT};
+    final List<Vector> captureVectors = Vector.PAWN_CAPTURES.get(color.ordinal());
     pushCapturePawnMoves(moves, captureVectors, start, color);
     return moves;
   }
@@ -516,10 +503,7 @@ public final class MoveGen {
     boolean onStartSquare = start.toString().contains(color == Color.W ? "2" : "7");
     pushRegularPawnMoves(game, moves, start, color, onStartSquare);
 
-    final Vector[] captureVectors =
-        color == Color.W
-            ? new Vector[] {Vector.UP_RIGHT, Vector.UP_LEFT}
-            : new Vector[] {Vector.DOWN_RIGHT, Vector.DOWN_LEFT};
+    final List<Vector> captureVectors = Vector.PAWN_CAPTURES.get(color.ordinal());
     pushCapturePawnMoves(game, moves, captureVectors, start, color);
     return moves;
   }

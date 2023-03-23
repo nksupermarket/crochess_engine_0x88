@@ -133,12 +133,12 @@ public class Psqt {
             {0, 0, 0, 0, 0, 0, 0, 0},
             };
 
-    public static long[][][][] table = new long[2][Piece.values().length][8][8];
+    public static long[][][][] table = new long[2][Piece.list.size()][8][8];
 
     static {
         long[][][] wTable = new long[7][8][8];
         long[][][] bTable = new long[7][8][8];
-        for (Piece pieceType : Piece.values()) {
+        for (Piece pieceType : Piece.list) {
             if (pieceType == Piece.NULL) {
                 wTable[pieceType.id] = new long[][]{};
                 bTable[pieceType.id] = new long[][]{};
